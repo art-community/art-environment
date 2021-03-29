@@ -18,21 +18,8 @@
  *
  */
 
-buildscript {
-    repositories {
-        maven("https://plugins.gradle.org/m2/")
-        mavenCentral()
-        jcenter()
-    }
-}
+package io.art.environment
 
-repositories {
-    maven("https://plugins.gradle.org/m2/")
-    mavenCentral()
-    jcenter()
-}
+import org.gradle.api.GradleException
 
-plugins {
-    `kotlin-dsl`
-}
-
+fun propertyNotExist(name: String) = GradleException("Property not exist: $name")

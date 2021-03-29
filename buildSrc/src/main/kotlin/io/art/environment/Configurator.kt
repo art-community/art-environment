@@ -18,21 +18,16 @@
  *
  */
 
-buildscript {
-    repositories {
-        maven("https://plugins.gradle.org/m2/")
-        mavenCentral()
-        jcenter()
-    }
-}
+package io.art.environment
 
-repositories {
-    maven("https://plugins.gradle.org/m2/")
-    mavenCentral()
-    jcenter()
-}
+import org.gradle.api.Project
 
-plugins {
-    `kotlin-dsl`
-}
+fun Project.loadProperty(name: String): String = findProperty(name) as String?
+        ?: throw propertyNotExist(COMMUNITY_URL_PROPERTY)
 
+fun Project.loadConfigurations(): EnvironmentConfiguration {
+    success("Welcome to ART development environment")
+    val environmentConfiguration = EnvironmentConfiguration(communityUrl = uri(loadProperty(COMMUNITY_URL_PROPERTY)).toURL())
+    success("Configuration loaded: $environmentConfiguration")
+    return environmentConfiguration
+}

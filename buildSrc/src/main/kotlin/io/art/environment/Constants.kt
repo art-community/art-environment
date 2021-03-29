@@ -18,21 +18,6 @@
  *
  */
 
-buildscript {
-    repositories {
-        maven("https://plugins.gradle.org/m2/")
-        mavenCentral()
-        jcenter()
-    }
-}
+package io.art.environment
 
-repositories {
-    maven("https://plugins.gradle.org/m2/")
-    mavenCentral()
-    jcenter()
-}
-
-plugins {
-    `kotlin-dsl`
-}
-
+const val COMMUNITY_URL_PROPERTY = "art.community.url"

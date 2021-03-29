@@ -19,6 +19,7 @@
  */
 
 import io.art.environment.ProjectsConfiguration
+import io.art.environment.loadConfigurations
 
 /*
  * ART
@@ -62,3 +63,8 @@ buildScan {
 }
 
 val configuration = ProjectsConfiguration(url = "test")
+
+
+afterEvaluate {
+    loadConfigurations()
+}

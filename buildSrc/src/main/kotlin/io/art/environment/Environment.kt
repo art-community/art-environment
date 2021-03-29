@@ -20,4 +20,13 @@
 
 package io.art.environment
 
+import java.net.URL
+
+class Environment
+
 data class ProjectsConfiguration(val url: String)
+
+data class EnvironmentConfiguration(
+        val communityUrl: URL
+)
+
