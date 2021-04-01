@@ -49,7 +49,7 @@ fun Settings.art(configurator: EnvironmentConfiguration.() -> Unit) {
     success("Welcome to ART development environment")
     val environmentConfiguration = EnvironmentConfiguration()
     configurator(environmentConfiguration)
-    //fetchProject(environmentConfiguration.communityUrl + "art-java", "java")
+    fetchProject(environmentConfiguration.communityUrl + "art-java", "java")
     include("projects:java")
 
     gradle.projectsLoaded {
