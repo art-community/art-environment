@@ -16,17 +16,4 @@
  * limitations under the License.
  */
 
-rootProject.name = "environment"
-
-val local = file("local.gradle.kts")
-val global = file("global.gradle.kts")
-
-fun selectEnvironment() {
-    if (local.exists()) {
-        apply(local.absolutePath)
-        return
-    }
-    apply(local.absolutePath)
-}
-
-selectEnvironment()
+rootProject.name = "plugin"

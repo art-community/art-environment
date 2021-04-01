@@ -18,6 +18,21 @@
  *
  */
 
-package io.art.environment
+repositories {
+    mavenCentral()
+    jcenter()
+}
 
-const val COMMUNITY_URL_PROPERTY = "art.community.url"
+plugins {
+    `kotlin-dsl`
+    id("com.github.johnrengelman.shadow") version "5.0.0"
+}
+
+dependencies {
+    implementation("org.eclipse.jgit:org.eclipse.jgit:+")
+}
+
+tasks["jar"].dependsOn("shadowJar")
+
+tasks["build"].doLast {
+}

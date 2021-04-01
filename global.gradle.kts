@@ -18,15 +18,13 @@
  *
  */
 
-package io.art.environment
+buildscript {
+    dependencies {
+        classpath(files("plugin/build/libs/plugin-all.jar"))
+    }
+}
 
-import java.net.URL
-
-class Environment
-
-data class ProjectsConfiguration(val url: String)
-
-data class EnvironmentConfiguration(
-        val communityUrl: URL
-)
-
+art {
+    includeJava()
+    includeTarantool()
+}

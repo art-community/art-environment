@@ -68,3 +68,5 @@ tarantoo/
 zookeeper/
 tarantool/lua
 .DS_Store
+projects/
+local.gradle.kts

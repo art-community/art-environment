@@ -18,21 +18,15 @@
  *
  */
 
-buildscript {
-    repositories {
-        maven("https://plugins.gradle.org/m2/")
-        mavenCentral()
-        jcenter()
-    }
-}
+import org.eclipse.jgit.api.Git
+import org.gradle.api.initialization.Settings
 
-repositories {
-    maven("https://plugins.gradle.org/m2/")
-    mavenCentral()
-    jcenter()
+fun Settings.fetchProject(uri: String, name: String) {
+    Git
+            .cloneRepository()
+            .setURI(uri)
+            .setBranch("1.3.0")
+            .setDirectory(settingsDir.resolve("projects").resolve(name))
+            .call()
+            .close()
 }
-
-plugins {
-    `kotlin-dsl`
-}
-

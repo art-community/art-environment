@@ -18,8 +18,6 @@
  *
  */
 
-package io.art.environment
+import org.gradle.api.Project
 
-import org.gradle.api.GradleException
-
-fun propertyNotExist(name: String) = GradleException("Property not exist: $name")
+fun Project.loadProperty(name: String): String = findProperty(name) as String? ?: throw propertyNotExist(name)

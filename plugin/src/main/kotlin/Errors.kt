@@ -18,16 +18,6 @@
  *
  */
 
-package io.art.environment
+import org.gradle.api.GradleException
 
-import org.gradle.api.Project
-
-fun Project.loadProperty(name: String): String = findProperty(name) as String?
-        ?: throw propertyNotExist(COMMUNITY_URL_PROPERTY)
-
-fun Project.loadConfigurations(): EnvironmentConfiguration {
-    success("Welcome to ART development environment")
-    val environmentConfiguration = EnvironmentConfiguration(communityUrl = uri(loadProperty(COMMUNITY_URL_PROPERTY)).toURL())
-    success("Configuration loaded: $environmentConfiguration")
-    return environmentConfiguration
-}
+fun propertyNotExist(name: String) = GradleException("Property not exist: $name")
