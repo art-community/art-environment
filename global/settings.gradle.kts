@@ -16,4 +16,14 @@
  * limitations under the License.
  */
 
-rootProject.name = "environment"
+rootProject.name = "art"
+
+buildscript {
+    dependencies {
+        classpath(files("../plugin/build/libs/plugin-all.jar"))
+    }
+}
+
+art {
+    println("test")
+}
