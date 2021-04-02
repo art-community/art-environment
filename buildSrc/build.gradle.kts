@@ -16,14 +16,20 @@
  * limitations under the License.
  */
 
-rootProject.name = "art"
-
-buildscript {
-    dependencies {
-        classpath(files("../plugin/build/libs/plugin-all.jar"))
-    }
+repositories {
+    jcenter()
+    mavenCentral()
 }
 
-art {
-    println("test")
+plugins {
+    `kotlin-dsl`
+}
+
+gradlePlugin {
+    plugins {
+        register("environment") {
+            id = "environment"
+            implementationClass = "EnvironmentPlugin"
+        }
+    }
 }
