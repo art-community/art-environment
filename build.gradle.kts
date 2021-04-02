@@ -11,13 +11,11 @@ art {
         instance("storage-1") {
             """
                box.cfg{listen=3306}
-               box.schema.create_space("fuck", {if_not_exists = true })
             """.trimIndent()
         }
         instance("storage-2") {
             """
                box.cfg{listen=3305}
-               box.schema.create_space("fuck", {if_not_exists = true })
             """.trimIndent()
         }
     }
