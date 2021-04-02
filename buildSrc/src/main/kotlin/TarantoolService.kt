@@ -22,9 +22,9 @@ import org.zeroturnaround.exec.listener.ProcessListener
  */
 
 fun Project.runTarantool(lua: String, name: String) {
-    val windowsScript = projectDir.resolve("scripts").resolve("tarantool.bat")
+    val windowsScript = rootProject.projectDir.resolve("scripts").resolve("tarantool.bat")
     val workingDirectory = projectDir.resolve("runtime").resolve(name)
-    if (!workingDirectory.exists()) workingDirectory.mkdir()
+    if (!workingDirectory.exists()) workingDirectory.mkdirs()
     val luaScript = workingDirectory.resolve("initial.lua")
     luaScript.writeText(lua)
 
@@ -33,6 +33,7 @@ fun Project.runTarantool(lua: String, name: String) {
             .directory(workingDirectory)
             .redirectOutput(System.out)
             .redirectError(System.err)
+            .destroyOnExit()
             .start()
             .process
 }

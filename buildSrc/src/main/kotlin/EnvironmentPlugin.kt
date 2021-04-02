@@ -37,6 +37,8 @@ class EnvironmentPlugin : Plugin<Project> {
                 art.tarantoolConfiguration.instances.forEach { instance -> runTarantool(instance.lua, instance.name) }
             }
         }
+
+        Thread.currentThread().join()
     }
 }
 
