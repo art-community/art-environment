@@ -7,14 +7,17 @@ art {
     kotlin()
     generator()
     tarantool {
+        from("my url", "1.2.3")
         instance("storage-1") {
             """
-                local a = "test"
+               box.cfg{listen=3306}
+               box.schema.create_space("fuck", {if_not_exists = true })
             """.trimIndent()
         }
         instance("storage-2") {
             """
-                local a = "test"
+               box.cfg{listen=3305}
+               box.schema.create_space("fuck", {if_not_exists = true })
             """.trimIndent()
         }
     }

@@ -1,3 +1,6 @@
+import org.gradle.api.model.ObjectFactory
+import javax.inject.Inject
+
 /*
  * ART
  *
@@ -16,27 +19,22 @@
  * limitations under the License.
  */
 
-repositories {
-    jcenter()
-    mavenCentral()
-    gradlePluginPortal()
-}
+open class ProjectConfiguration @Inject constructor(objectFactory: ObjectFactory, val name: String) {
+    var url: String? = null
+        private set
+    var version: String? = null
+        private set
 
-plugins {
-    `kotlin-dsl`
-}
-
-gradlePlugin {
-    plugins {
-        register("environment") {
-            id = "environment"
-            implementationClass = "EnvironmentPlugin"
-        }
+    fun from(url: String, version: String) {
+        this.url = url
+        this.version = version
     }
-}
 
-dependencies {
-    implementation("org.eclipse.jgit:org.eclipse.jgit-parent:+")
-    implementation("org.zeroturnaround:zt-exec:+")
+    fun url(url: String) {
+        this.url = url
+    }
 
+    fun version(version: String) {
+        this.version = version
+    }
 }

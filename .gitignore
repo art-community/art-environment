@@ -69,3 +69,4 @@ zookeeper/
 tarantool/lua
 .DS_Store
 local/
+runtime/

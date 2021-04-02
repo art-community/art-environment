@@ -1,8 +1,6 @@
-import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.model.ObjectFactory
-import javax.inject.Inject
+import org.zeroturnaround.exec.ProcessExecutor
 
 /*
  * ART
@@ -23,64 +21,26 @@ import javax.inject.Inject
  */
 
 
-const val ART = "art"
-const val CONFIGURE = "configure"
-const val BOOTSTRAP_TARANTOOL = "bootstrap-tarantool"
-const val JAVA = "java"
-const val KOTLIN = "kotlin"
-const val TARANTOOL = "tarantool"
-const val GENERATOR = "generator"
 
 class EnvironmentPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
         val art = extensions.create(ART, ArtExtension::class.java, this)
+
         tasks.register(CONFIGURE) {
             group = ART
         }
+
         tasks.register(BOOTSTRAP_TARANTOOL) {
             group = ART
-        }
-        afterEvaluate {
-        }
-    }
-}
-
-
-open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val project: Project) {
-    val projects = mutableSetOf<String>()
-    val tarantoolConfiguration = objectFactory.newInstance(TarantoolConfiguration::class.java)
-
-    fun java() {
-        projects += JAVA
-    }
-
-    fun kotlin() {
-        projects += KOTLIN
-    }
-
-    fun generator() {
-        projects += GENERATOR
-    }
-
-    fun tarantool(configurator: Action<in TarantoolConfiguration>) {
-        projects += TARANTOOL
-        configurator.execute(tarantoolConfiguration)
-    }
-}
-
-open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFactory) {
-    val instances = objectFactory.domainObjectContainer(InstanceConfiguration::class.java)
-
-    fun instance(name: String, lua: () -> String) {
-        instances.register(name) { lua(lua()) }
-    }
-
-    open class InstanceConfiguration(val name: String) {
-        lateinit var lua: String
-            private set
-
-        fun lua(script: String) {
-            this.lua = script
+            doLast {
+                ProcessExecutor().command("bash", "-c", """"pkill tarantool"""").execute()
+                art.tarantoolConfiguration.instances.forEach { instance -> runTarantool(instance.lua, instance.name) }
+            }
         }
     }
 }
+
+
+
+
+
