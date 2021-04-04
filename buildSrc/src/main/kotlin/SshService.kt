@@ -16,9 +16,6 @@
  * limitations under the License.
  */
 
-package service.common
-
-import constants.LOCALHOST
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.sftp.OpenMode.*

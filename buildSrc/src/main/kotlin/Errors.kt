@@ -16,27 +16,7 @@
  * limitations under the License.
  */
 
-package configuration
+import org.gradle.api.GradleException
+import java.nio.file.Path
 
-import org.gradle.api.model.ObjectFactory
-import javax.inject.Inject
-
-open class ProjectConfiguration @Inject constructor(objectFactory: ObjectFactory, val name: String) {
-    var url: String? = null
-        private set
-    var version: String? = null
-        private set
-
-    fun from(url: String, version: String) {
-        this.url = url
-        this.version = version
-    }
-
-    fun url(url: String) {
-        this.url = url
-    }
-
-    fun version(version: String) {
-        this.version = version
-    }
-}
+fun fileCreationException(path: Path) = GradleException("Unable to create file: $path")

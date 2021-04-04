@@ -16,21 +16,15 @@
  * limitations under the License.
  */
 
-package service.common
-
-import constants.isWindows
 import org.zeroturnaround.exec.ProcessExecutor
 import org.zeroturnaround.exec.ProcessResult
 import org.zeroturnaround.exec.StartedProcess
-import plugin
-import pool.registerProcess
-import service.windows.WindowsExecutionService
 import java.nio.file.Path
 
 interface ExecutionService {
     fun execute(name: String, content: String, configurator: ExecutionConfiguration.() -> ExecutionConfiguration = { this })
 
-    fun kill(processId: StartedProcess)
+    fun kill(process: ScriptProcess)
 
     fun runProcess(directory: Path, decorator: ProcessExecutor.() -> ProcessExecutor = { this }) =
             ProcessExecutor()
@@ -52,6 +46,10 @@ class ExecutionConfiguration {
 
     fun directory(directory: Path) = apply { this.directory = directory }
 }
+
+data class ScriptProcess(val process: StartedProcess,
+                         val scriptName: String,
+                         val scriptPath: Path, val scriptHash: String)
 
 val executionService: ExecutionService
     get() = when {

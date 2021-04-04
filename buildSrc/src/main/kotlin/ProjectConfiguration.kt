@@ -16,26 +16,25 @@
  * limitations under the License.
  */
 
-package configuration
-
-import constants.TARANTOOL
 import org.gradle.api.model.ObjectFactory
 import javax.inject.Inject
 
-open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFactory) : ProjectConfiguration(objectFactory, TARANTOOL) {
-    val instances = objectFactory.domainObjectContainer(InstanceConfiguration::class.java)
+open class ProjectConfiguration @Inject constructor(objectFactory: ObjectFactory, val name: String) {
+    var url: String? = null
+        private set
+    var version: String? = null
+        private set
 
-    fun instance(name: String, lua: () -> String = { "" }) {
-        instances.register(name) { lua(lua()) }
+    fun from(url: String, version: String) {
+        this.url = url
+        this.version = version
     }
 
-    open class InstanceConfiguration(val name: String) {
-        lateinit var lua: String
-            private set
+    fun url(url: String) {
+        this.url = url
+    }
 
-        fun lua(script: String) {
-            this.lua = script
-        }
-
+    fun version(version: String) {
+        this.version = version
     }
 }

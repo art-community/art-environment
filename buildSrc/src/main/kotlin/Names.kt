@@ -16,21 +16,6 @@
  * limitations under the License.
  */
 
-package service.common
+fun batScript(name: String) = "$name$DOT_BAT"
 
-import org.zeroturnaround.exec.ProcessExecutor
-import java.nio.file.Path
-
-
-fun openMacTerminal(command: String) = arrayOf(
-        "osascript",
-        "-e",
-        """'tell app "Terminal" to do script "$command"'"""
-)
-
-fun runMacScript(script: String, directory: Path, vararg arguments: String) = ProcessExecutor()
-        .command(*(openMacTerminal(script) + arguments))
-        .redirectOutput(System.out)
-        .redirectError(System.err)
-        .start()
-        .process
+fun shScript(name: String) = "$name$DOT_SH"

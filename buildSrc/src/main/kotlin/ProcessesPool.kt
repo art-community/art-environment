@@ -16,10 +16,7 @@
  * limitations under the License.
  */
 
-package pool
-
 import org.zeroturnaround.exec.StartedProcess
-import service.common.executionService
 import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.HOURS
@@ -32,7 +29,7 @@ fun waitProcesses(timeout: Long = 1, unit: TimeUnit = HOURS) = scheduler.awaitTe
 fun forEachProcess(action: (process: StartedProcess) -> Unit) = processes.forEach(action)
 
 fun killProcesses() = forEachProcess { process ->
-    executionService.kill(process)
+    //executionService.kill(process)
     process.future.cancel(true)
 }
 

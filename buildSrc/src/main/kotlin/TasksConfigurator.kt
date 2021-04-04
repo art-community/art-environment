@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
-package configurator
-
 import ArtExtension
 import org.gradle.api.Project
 
 
 fun Project.configureTasks(extension: ArtExtension) {
-
     tasks.register("debug") {
+        doLast {
+
+        }
     }
 }

@@ -16,10 +16,6 @@
  * limitations under the License.
  */
 
-package service.common
-
-import constants.*
-import plugin
 import java.nio.charset.Charset
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -52,10 +48,10 @@ fun Path.toWsl(): Path {
     if (path.isBlank()) {
         return this
     }
-    if (SLASH == EMPTY_STRING + path[0] || constants.BACKWARD_SLASH == EMPTY_STRING + path[0]) {
+    if (SLASH == EMPTY_STRING + path[0] || BACKWARD_SLASH == EMPTY_STRING + path[0]) {
         path = path.substring(1)
     }
-    if (path.contains(WINDOWS_DISK_PATH_SLASH) || path.contains(constants.WINDOWS_DISK_PATH_BACKWARD_SLASH)) {
+    if (path.contains(WINDOWS_DISK_PATH_SLASH) || path.contains(WINDOWS_DISK_PATH_BACKWARD_SLASH)) {
         path = path
                 .replace(WINDOWS_DISK_PATH_SLASH.toRegex(), SLASH)
                 .replace(WINDOWS_DISK_PATH_BACKWARD_SLASH_REGEX.toRegex(), SLASH)

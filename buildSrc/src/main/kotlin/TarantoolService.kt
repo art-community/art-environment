@@ -16,8 +16,13 @@
  * limitations under the License.
  */
 
-package constants
+import org.gradle.api.Project
 
-fun batScript(name: String) = "$name$DOT_BAT"
+fun Project.runTarantool(lua: String, name: String) {
+    val windowsScript = rootProject.projectDir.resolve("scripts").resolve("tarantool.bat")
+    val workingDirectory = projectDir.resolve("runtime").resolve(name)
+    if (!workingDirectory.exists()) workingDirectory.mkdirs()
+    val luaScript = workingDirectory.resolve("initial.lua")
+    luaScript.writeText(lua)
 
-fun shScript(name: String) = "$name$DOT_SH"
+}

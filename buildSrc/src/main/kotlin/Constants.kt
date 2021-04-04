@@ -16,8 +16,6 @@
  * limitations under the License.
  */
 
-package constants
-
 import org.gradle.api.Action
 import java.lang.System.getProperty
 

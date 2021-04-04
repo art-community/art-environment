@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-package constants
-
-import org.gradle.api.GradleException
 import java.nio.file.Path
 
-fun fileCreationException(path: Path) = GradleException("Unable to create file: $path")
+data class PathsConfiguration(
+        val runtimeDirectory: Path,
+        val scriptsDirectory: Path,
+        val remoteRuntimeDirectory: String,
+        val remoteScriptsDirectory: String)

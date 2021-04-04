@@ -16,12 +16,19 @@
  * limitations under the License.
  */
 
-package configuration
-
+import org.zeroturnaround.exec.ProcessExecutor
 import java.nio.file.Path
 
-data class PathsConfiguration(
-        val runtimeDirectory: Path,
-        val scriptsDirectory: Path,
-        val remoteRuntimeDirectory: String,
-        val remoteScriptsDirectory: String)
+
+fun openMacTerminal(command: String) = arrayOf(
+        "osascript",
+        "-e",
+        """'tell app "Terminal" to do script "$command"'"""
+)
+
+fun runMacScript(script: String, directory: Path, vararg arguments: String) = ProcessExecutor()
+        .command(*(openMacTerminal(script) + arguments))
+        .redirectOutput(System.out)
+        .redirectError(System.err)
+        .start()
+        .process

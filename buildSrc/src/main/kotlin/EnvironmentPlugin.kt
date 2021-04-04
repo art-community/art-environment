@@ -16,11 +16,8 @@
  * limitations under the License.
  */
 
-import configuration.PathsConfiguration
-import configurator.configureTasks
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import constants.*
 
 lateinit var plugin: EnvironmentPlugin
     private set

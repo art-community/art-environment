@@ -16,15 +16,17 @@
  * limitations under the License.
  */
 
-package service.common
+object WindowsExecutionService : ExecutionService {
+    override fun execute(name: String, content: String, configurator: ExecutionConfiguration.() -> ExecutionConfiguration) {
+        runProcess(configurator(ExecutionConfiguration()).directory) {
+            command("cmd.exe", "/c", """start "$name" "cmd /c ${writeScript(name, content).toAbsolutePath()}" """)
+        }
+    }
 
-import org.gradle.api.Project
-
-fun Project.runTarantool(lua: String, name: String) {
-    val windowsScript = rootProject.projectDir.resolve("scripts").resolve("tarantool.bat")
-    val workingDirectory = projectDir.resolve("runtime").resolve(name)
-    if (!workingDirectory.exists()) workingDirectory.mkdirs()
-    val luaScript = workingDirectory.resolve("initial.lua")
-    luaScript.writeText(lua)
-
+    override fun kill(process: ScriptProcess) {
+        process.process.process.destroy()
+//        executeProcess(plugin.paths.runtimeDirectory) {
+//            //command("taskkill", "/f", "/t", )
+//        }
+    }
 }
