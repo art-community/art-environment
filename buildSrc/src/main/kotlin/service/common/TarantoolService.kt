@@ -1,8 +1,3 @@
-import org.gradle.api.Project
-import org.zeroturnaround.exec.ProcessExecutor
-import org.zeroturnaround.exec.ProcessResult
-import org.zeroturnaround.exec.listener.ProcessListener
-
 /*
  * ART
  *
@@ -21,6 +16,10 @@ import org.zeroturnaround.exec.listener.ProcessListener
  * limitations under the License.
  */
 
+package service.common
+
+import org.gradle.api.Project
+
 fun Project.runTarantool(lua: String, name: String) {
     val windowsScript = rootProject.projectDir.resolve("scripts").resolve("tarantool.bat")
     val workingDirectory = projectDir.resolve("runtime").resolve(name)
@@ -28,12 +27,4 @@ fun Project.runTarantool(lua: String, name: String) {
     val luaScript = workingDirectory.resolve("initial.lua")
     luaScript.writeText(lua)
 
-    ProcessExecutor()
-            .command(*(openWindowsTerminal(windowsScript.absolutePath, name) + convertToWslPath(luaScript.absolutePath)))
-            .directory(workingDirectory)
-            .redirectOutput(System.out)
-            .redirectError(System.err)
-            .destroyOnExit()
-            .start()
-            .process
 }

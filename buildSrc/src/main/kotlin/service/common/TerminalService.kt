@@ -1,6 +1,3 @@
-import org.zeroturnaround.exec.ProcessExecutor
-import java.nio.file.Path
-
 /*
  * ART
  *
@@ -19,12 +16,11 @@ import java.nio.file.Path
  * limitations under the License.
  */
 
+package service.common
 
-fun openWindowsTerminal(command: String, label: String) = arrayOf(
-        "cmd.exe",
-        "/c",
-        """start "$label" "$command""""
-)
+import org.zeroturnaround.exec.ProcessExecutor
+import java.nio.file.Path
+
 
 fun openMacTerminal(command: String) = arrayOf(
         "osascript",

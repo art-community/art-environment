@@ -1,6 +1,3 @@
-import org.gradle.api.model.ObjectFactory
-import javax.inject.Inject
-
 /*
  * ART
  *
@@ -19,6 +16,12 @@ import javax.inject.Inject
  * limitations under the License.
  */
 
+package configuration
+
+import constants.TARANTOOL
+import org.gradle.api.model.ObjectFactory
+import javax.inject.Inject
+
 open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFactory) : ProjectConfiguration(objectFactory, TARANTOOL) {
     val instances = objectFactory.domainObjectContainer(InstanceConfiguration::class.java)
 
@@ -27,22 +30,12 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
     }
 
     open class InstanceConfiguration(val name: String) {
-        var executable = determineCommand()
-            private set
         lateinit var lua: String
             private set
-
-        fun executable(executable: String) {
-            this.executable = executable
-        }
 
         fun lua(script: String) {
             this.lua = script
         }
 
-        private fun determineCommand() = when {
-            isWindows -> "cmd /k wsl -c tarantool"
-            else -> "tarantool"
-        }
     }
 }

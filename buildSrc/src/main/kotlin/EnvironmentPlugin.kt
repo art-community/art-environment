@@ -1,7 +1,3 @@
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.zeroturnaround.exec.ProcessExecutor
-
 /*
  * ART
  *
@@ -20,27 +16,34 @@ import org.zeroturnaround.exec.ProcessExecutor
  * limitations under the License.
  */
 
+import configuration.PathsConfiguration
+import configurator.configureTasks
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import constants.*
 
+lateinit var plugin: EnvironmentPlugin
+    private set
 
 class EnvironmentPlugin : Plugin<Project> {
+    lateinit var project: Project
+        private set
+    lateinit var paths: PathsConfiguration
+        private set
+
     override fun apply(project: Project): Unit = project.run {
-        val art = extensions.create(ART, ArtExtension::class.java, this)
+        initializeConfiguration()
+        configureTasks(extensions.create(ART, ArtExtension::class.java, this))
+        gradle.buildFinished { repeat(2) {} }
+    }
 
-        tasks.register(CONFIGURE) {
-            group = ART
-        }
-
-        tasks.register(BOOTSTRAP_TARANTOOL) {
-            group = ART
-            doLast {
-                ProcessExecutor().command("bash", "-c", """"pkill tarantool"""").execute()
-                art.tarantoolConfiguration.instances.forEach { instance -> runTarantool(instance.lua, instance.name) }
-            }
-        }
+    private fun Project.initializeConfiguration() {
+        plugin = this@EnvironmentPlugin
+        plugin.project = this
+        paths = PathsConfiguration(
+                runtimeDirectory = plugin.project.projectDir.resolve(RUNTIME).toPath(),
+                scriptsDirectory = plugin.project.projectDir.resolve(SCRIPTS).toPath(),
+                remoteRuntimeDirectory = REMOTE_RUNTIME_DIRECTORY(project.name),
+                remoteScriptsDirectory = REMOTE_SCRIPTS_DIRECTORY(project.name))
     }
 }
-
-
-
-
-

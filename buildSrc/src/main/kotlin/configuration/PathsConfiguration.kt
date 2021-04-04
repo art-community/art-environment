@@ -1,6 +1,3 @@
-import org.gradle.api.model.ObjectFactory
-import javax.inject.Inject
-
 /*
  * ART
  *
@@ -19,22 +16,12 @@ import javax.inject.Inject
  * limitations under the License.
  */
 
-open class ProjectConfiguration @Inject constructor(objectFactory: ObjectFactory, val name: String) {
-    var url: String? = null
-        private set
-    var version: String? = null
-        private set
+package configuration
 
-    fun from(url: String, version: String) {
-        this.url = url
-        this.version = version
-    }
+import java.nio.file.Path
 
-    fun url(url: String) {
-        this.url = url
-    }
-
-    fun version(version: String) {
-        this.version = version
-    }
-}
+data class PathsConfiguration(
+        val runtimeDirectory: Path,
+        val scriptsDirectory: Path,
+        val remoteRuntimeDirectory: String,
+        val remoteScriptsDirectory: String)

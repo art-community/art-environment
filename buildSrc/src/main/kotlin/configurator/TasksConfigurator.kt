@@ -16,27 +16,14 @@
  * limitations under the License.
  */
 
-repositories {
-    jcenter()
-    mavenCentral()
-    gradlePluginPortal()
-}
+package configurator
 
-plugins {
-    `kotlin-dsl`
-}
+import ArtExtension
+import org.gradle.api.Project
 
-gradlePlugin {
-    plugins {
-        register("environment") {
-            id = "environment"
-            implementationClass = "EnvironmentPlugin"
-        }
+
+fun Project.configureTasks(extension: ArtExtension) {
+
+    tasks.register("debug") {
     }
-}
-
-dependencies {
-    implementation("org.eclipse.jgit:org.eclipse.jgit-parent:+")
-    implementation("org.zeroturnaround:zt-exec:+")
-    implementation("com.hierynomus", "sshj", "+")
 }

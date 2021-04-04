@@ -1,8 +1,3 @@
-import org.gradle.api.Action
-import org.gradle.api.Project
-import org.gradle.api.model.ObjectFactory
-import javax.inject.Inject
-
 /*
  * ART
  *
@@ -21,6 +16,15 @@ import javax.inject.Inject
  * limitations under the License.
  */
 
+import configuration.ProjectConfiguration
+import configuration.TarantoolConfiguration
+import constants.*
+import org.gradle.api.Action
+import org.gradle.api.Project
+import org.gradle.api.model.ObjectFactory
+import service.common.SshConfiguration
+import javax.inject.Inject
+
 open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val project: Project) {
     val projects = mutableSetOf<String>()
 
@@ -34,6 +38,8 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
     val generatorConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, GENERATOR)
 
     val tarantoolConfiguration = objectFactory.newInstance(TarantoolConfiguration::class.java)
+
+    val sshConfiguration = objectFactory.newInstance(SshConfiguration::class.java)
 
     fun url(url: String) {
         this.defaultUrl = url
@@ -57,5 +63,9 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
     fun tarantool(configurator: Action<in TarantoolConfiguration>) {
         projects += TARANTOOL
         configurator.execute(tarantoolConfiguration)
+    }
+
+    fun ssh(configurator: Action<in SshConfiguration>) {
+        configurator.execute(sshConfiguration)
     }
 }
