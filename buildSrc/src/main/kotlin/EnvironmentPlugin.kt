@@ -27,20 +27,19 @@ class EnvironmentPlugin : Plugin<Project> {
         private set
     lateinit var paths: PathsConfiguration
         private set
+    lateinit var extension: ArtExtension
+        private set
 
     override fun apply(project: Project): Unit = project.run {
-        initializeConfiguration()
-        configureTasks(extensions.create(ART, ArtExtension::class.java, this))
-        gradle.buildFinished { repeat(2) {} }
-    }
-
-    private fun Project.initializeConfiguration() {
         plugin = this@EnvironmentPlugin
         plugin.project = this
         paths = PathsConfiguration(
                 runtimeDirectory = plugin.project.projectDir.resolve(RUNTIME).toPath(),
                 scriptsDirectory = plugin.project.projectDir.resolve(SCRIPTS).toPath(),
+                projectsDirectory = plugin.project.projectDir.resolve(PROJECTS).toPath(),
                 remoteRuntimeDirectory = REMOTE_RUNTIME_DIRECTORY(project.name),
                 remoteScriptsDirectory = REMOTE_SCRIPTS_DIRECTORY(project.name))
+        extension = extensions.create(ART, ArtExtension::class.java, this)
+        configureTasks()
     }
 }

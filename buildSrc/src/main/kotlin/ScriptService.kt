@@ -1,3 +1,6 @@
+import java.nio.file.Path
+import java.nio.file.Paths
+
 /*
  * ART
  *
@@ -16,17 +19,11 @@
  * limitations under the License.
  */
 
-object WindowsExecutionService : ExecutionService {
-    override fun execute(name: String, content: String, configurator: ExecutionConfiguration.() -> ExecutionConfiguration) {
-        runProcess(configurator(ExecutionConfiguration()).directory) {
-            command("cmd.exe", "/c", """start "$name" "cmd /c ${writeScript(name, content).toAbsolutePath()}" """)
-        }
-    }
 
-    override fun kill(process: ScriptProcess) {
-        process.process.process.destroy()
-//        executeProcess(plugin.paths.runtimeDirectory) {
-//            //command("taskkill", "/f", "/t", )
-//        }
-    }
-}
+fun writeScript(path: Path, content: String) = path.write(content)
+
+fun Path.bat(): Path = Paths.get("${toAbsolutePath()}$DOT_BAT")
+
+fun Path.sh(): Path = Paths.get("${toAbsolutePath()}$DOT_SH")
+
+fun Path.lua(): Path = Paths.get("${toAbsolutePath()}$DOT_LUA")

@@ -20,7 +20,7 @@ import java.nio.charset.Charset
 import java.nio.file.Path
 import java.nio.file.Paths
 
-fun Path.directory(): Path {
+fun Path.touch(): Path {
     if (toFile().exists()) return this
     if (!toFile().mkdirs()) {
         throw fileCreationException(parent)
@@ -61,5 +61,3 @@ fun Path.toWsl(): Path {
     }
     return this
 }
-
-fun writeScript(name: String, content: String) = plugin.paths.scriptsDirectory.resolve(name).directory().write(content)

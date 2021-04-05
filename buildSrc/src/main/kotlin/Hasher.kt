@@ -16,31 +16,6 @@
  * limitations under the License.
  */
 
-repositories {
-    jcenter()
-    mavenCentral()
-    gradlePluginPortal()
-}
+import java.util.zip.CRC32
 
-plugins {
-    `kotlin-dsl`
-}
-
-gradlePlugin {
-    plugins {
-        register("environment") {
-            id = "environment"
-            implementationClass = "EnvironmentPlugin"
-        }
-    }
-}
-
-dependencies {
-    implementation("org.eclipse.jgit:org.eclipse.jgit:+")
-    implementation("org.zeroturnaround:zt-exec:+")
-    implementation("com.hierynomus", "sshj", "+")
-}
-
-kotlinDslPluginOptions {
-    experimentalWarning.set(false)
-}
+fun String.hash(): String = java.lang.Long.toHexString(CRC32().apply { update(toByteArray()) }.value)

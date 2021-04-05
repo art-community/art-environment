@@ -1,3 +1,8 @@
+import org.gradle.api.Project
+import org.zeroturnaround.exec.ProcessExecutor
+import java.io.ByteArrayOutputStream
+import java.nio.file.Path
+
 /*
  * ART
  *
@@ -16,43 +21,39 @@
  * limitations under the License.
  */
 
-import org.zeroturnaround.exec.ProcessExecutor
-import org.zeroturnaround.exec.ProcessResult
-import org.zeroturnaround.exec.StartedProcess
-import java.nio.file.Path
+fun Project.execute(vararg command: String) = execute(plugin.paths.runtimeDirectory, *command)
 
-interface ExecutionService {
-    fun execute(name: String, content: String, configurator: ExecutionConfiguration.() -> ExecutionConfiguration = { this })
-
-    fun kill(process: ScriptProcess)
-
-    fun runProcess(directory: Path, decorator: ProcessExecutor.() -> ProcessExecutor = { this }) =
-            ProcessExecutor()
-                    .directory(directory.toFile())
-                    .let(decorator)
-                    .start()
-                    .registerProcess()
-
-    fun executeProcess(directory: Path, decorator: ProcessExecutor.() -> ProcessExecutor = { this }): ProcessResult =
-            ProcessExecutor()
-                    .directory(directory.toFile())
-                    .let(decorator)
-                    .execute()
+fun Project.execute(directory: Path, vararg command: String) {
+    val output = ByteArrayOutputStream()
+    val error = ByteArrayOutputStream()
+    ProcessExecutor()
+            .directory(directory.touch().toFile())
+            .redirectOutput(output)
+            .redirectError(error)
+            .command(*command)
+            .execute()
+    output.toString().lineSequence().filter { line -> line.isNotBlank() }.forEach { line -> attention(line) }
+    error.toString().lineSequence().filter { line -> line.isNotBlank() }.forEach { line -> error(line) }
 }
 
-class ExecutionConfiguration {
-    var directory: Path = plugin.paths.runtimeDirectory
-        private set
 
-    fun directory(directory: Path) = apply { this.directory = directory }
+fun Project.execute(name: String, script: () -> String) = execute(name, plugin.paths.runtimeDirectory, script)
+
+fun Project.execute(name: String, script: String) = execute(name, plugin.paths.runtimeDirectory, script)
+
+
+fun Project.execute(name: String, directory: Path = plugin.paths.runtimeDirectory, script: () -> String) = execute(name, directory, script())
+
+fun Project.execute(name: String, directory: Path = plugin.paths.runtimeDirectory, script: String) {
+    val path = writeScript(plugin.paths.scriptsDirectory.touch().resolve(name).bat(), script.trimIndent())
+    val output = ByteArrayOutputStream()
+    val error = ByteArrayOutputStream()
+    ProcessExecutor()
+            .directory(directory.touch().toFile())
+            .redirectOutput(output)
+            .redirectError(error)
+            .command(path.toAbsolutePath().toString())
+            .execute()
+    output.toString().lineSequence().filter { line -> line.isNotBlank() }.forEach { line -> attention(line) }
+    error.toString().lineSequence().filter { line -> line.isNotBlank() }.forEach { line -> kotlin.error(line) }
 }
-
-data class ScriptProcess(val process: StartedProcess,
-                         val scriptName: String,
-                         val scriptPath: Path, val scriptHash: String)
-
-val executionService: ExecutionService
-    get() = when {
-        isWindows -> WindowsExecutionService
-        else -> error("")
-    }

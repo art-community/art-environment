@@ -67,6 +67,7 @@ const val STDOUT_LOG = ".stdout.log"
 const val STDERR_LOG = ".stderr.log"
 const val DOT_BAT = ".bat"
 const val DOT_SH = ".sh"
+const val DOT_LUA = ".lua"
 
 
 const val WIN = "win";

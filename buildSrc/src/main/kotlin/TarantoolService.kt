@@ -24,5 +24,4 @@ fun Project.runTarantool(lua: String, name: String) {
     if (!workingDirectory.exists()) workingDirectory.mkdirs()
     val luaScript = workingDirectory.resolve("initial.lua")
     luaScript.writeText(lua)
-
 }

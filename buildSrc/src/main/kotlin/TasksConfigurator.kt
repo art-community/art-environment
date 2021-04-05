@@ -16,14 +16,29 @@
  * limitations under the License.
  */
 
-import ArtExtension
 import org.gradle.api.Project
+import java.nio.file.Paths
 
 
-fun Project.configureTasks(extension: ArtExtension) {
+fun Project.configureTasks() {
+    tasks.register(CONFIGURE) {
+        group = ART
+        doLast { plugin.project.configureProjects() }
+    }
     tasks.register("debug") {
         doLast {
-
+            execute("cmd.exe", "/c", "echo", "test")
+            execute(Paths.get("test"), "cmd.exe", "/c", "echo", "test")
+            execute("test") {
+                """
+                   echo test 
+                """
+            }
+            execute("test", Paths.get("test")) {
+                """
+                   echo test 
+                """
+            }
         }
     }
 }

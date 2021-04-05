@@ -16,6 +16,3 @@
  * limitations under the License.
  */
 
-fun batScript(name: String) = "$name$DOT_BAT"
-
-fun shScript(name: String) = "$name$DOT_SH"
