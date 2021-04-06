@@ -16,6 +16,10 @@
  * limitations under the License.
  */
 
+tasks.withType(type = Wrapper::class) {
+    gradleVersion = "6.8.3"
+}
+
 tasks.create("prepareLocalEnvironment") {
     doLast {
         if (file("local").exists()) return@doLast

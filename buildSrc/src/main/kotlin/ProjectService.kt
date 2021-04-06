@@ -42,7 +42,7 @@ const val CURRENT_BRANCH_PREVIOUS_COMMIT_REV = "HEAD~1^{tree}"
 fun Project.configureProjects() = plugin.extension.run {
     val settingsBuilder = StringBuilder("""rootProject.name = "projects"""").appendln()
     projects.forEach { project ->
-        settingsBuilder.appendln("""include("$project")""")
+        settingsBuilder.append("""includeBuild("$project")""").append("\n")
         when (project) {
             JAVA -> javaConfiguration.configure()
             KOTLIN -> kotlinConfiguration.configure()
