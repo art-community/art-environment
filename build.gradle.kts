@@ -17,7 +17,7 @@
  */
 
 tasks.withType(type = Wrapper::class) {
-    gradleVersion = "6.8.3"
+    gradleVersion = "7.0-rc-2"
 }
 
 tasks.create("prepareLocalEnvironment") {

@@ -17,9 +17,7 @@
  */
 
 repositories {
-    jcenter()
     mavenCentral()
-    gradlePluginPortal()
 }
 
 plugins {
@@ -39,8 +37,4 @@ dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:+")
     implementation("org.zeroturnaround:zt-exec:+")
     implementation("com.hierynomus", "sshj", "+")
-}
-
-kotlinDslPluginOptions {
-    experimentalWarning.set(false)
 }
