@@ -47,8 +47,9 @@ const val CURRENT_BRANCH_PREVIOUS_COMMIT_REV = "HEAD~1^{tree}"
 fun Project.configureProjects() = plugin.extension.run {
     val settings = buildString {
         append("""rootProject.name = "projects"""")
+        append("\n")
         projects.forEach { project ->
-            append("""includeBuild("$project")""").append("\n")
+            append("""includeBuild("${PROJECT_SOURCES[project]}")""").append("\n")
             when (project) {
                 JAVA -> javaConfiguration.configure()
                 KOTLIN -> kotlinConfiguration.configure()
@@ -71,7 +72,7 @@ fun Project.configureProjects() = plugin.extension.run {
 }
 
 private fun ProjectConfiguration.configure() {
-    val directory = plugin.paths.projectsDirectory.resolve(name)
+    val directory = plugin.paths.projectsDirectory.resolve(PROJECT_SOURCES[name])
     val url = url ?: "${plugin.extension.defaultUrl}/${PROJECT_SOURCES[name]}"
     val clone = {
         cloneRepository()
