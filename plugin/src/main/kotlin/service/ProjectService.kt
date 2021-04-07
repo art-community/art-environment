@@ -16,6 +16,11 @@
  * limitations under the License.
  */
 
+package service
+
+import configuration.ProjectConfiguration
+import constants.*
+import logger.error
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode.TRACK
 import org.eclipse.jgit.api.Git.cloneRepository
 import org.eclipse.jgit.api.Git.open
@@ -27,7 +32,7 @@ import org.eclipse.jgit.merge.MergeStrategy.THEIRS
 import org.eclipse.jgit.transport.RefSpec
 import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
 import org.gradle.api.Project
-
+import plugin.plugin
 
 const val REFS_HEADS = "refs/heads/"
 const val REFS_TAGS = "refs/tags/"
@@ -40,17 +45,29 @@ const val CURRENT_BRANCH_PREVIOUS_COMMIT_REV = "HEAD~1^{tree}"
 
 
 fun Project.configureProjects() = plugin.extension.run {
-    val settingsBuilder = StringBuilder("""rootProject.name = "projects"""").appendln()
-    projects.forEach { project ->
-        settingsBuilder.append("""includeBuild("$project")""").append("\n")
-        when (project) {
-            JAVA -> javaConfiguration.configure()
-            KOTLIN -> kotlinConfiguration.configure()
-            TARANTOOL -> tarantoolConfiguration.configure()
-            GENERATOR -> generatorConfiguration.configure()
+    val settings = buildString {
+        append("""rootProject.name = "projects"""")
+        projects.forEach { project ->
+            append("""includeBuild("$project")""").append("\n")
+            when (project) {
+                JAVA -> javaConfiguration.configure()
+                KOTLIN -> kotlinConfiguration.configure()
+                TARANTOOL -> tarantoolConfiguration.configure()
+                GENERATOR -> generatorConfiguration.configure()
+            }
         }
     }
-    plugin.paths.projectsDirectory.resolve("settings.gradle.kts").write(settingsBuilder.toString())
+    val project = buildString {
+        append(
+                """
+                    tasks.withType(type = Wrapper::class) {
+                        gradleVersion = "7.0-rc-2"
+                    }
+                """.trimIndent()
+        )
+    }
+    plugin.paths.projectsDirectory.resolve("settings.gradle.kts").write(settings)
+    plugin.paths.projectsDirectory.resolve("build.gradle.kts").write(project)
 }
 
 private fun ProjectConfiguration.configure() {

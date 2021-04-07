@@ -16,7 +16,29 @@
  * limitations under the License.
  */
 
-import org.gradle.api.GradleException
-import java.nio.file.Path
+repositories {
+    mavenCentral()
+}
 
-fun fileCreationException(path: Path) = GradleException("Unable to create file: $path")
+plugins {
+    `kotlin-dsl`
+}
+
+tasks.withType(type = Wrapper::class) {
+    gradleVersion = "7.0-rc-2"
+}
+
+gradlePlugin {
+    plugins {
+        register("environment") {
+            id = "environment"
+            implementationClass = "plugin.EnvironmentPlugin"
+        }
+    }
+}
+
+dependencies {
+    implementation("org.eclipse.jgit:org.eclipse.jgit:+")
+    implementation("org.zeroturnaround:zt-exec:+")
+    implementation("com.hierynomus", "sshj", "+")
+}

@@ -16,7 +16,9 @@
  * limitations under the License.
  */
 
-import LogMessageColor.*
+package logger
+
+import logger.LogMessageColor.*
 import org.gradle.api.Project
 
 const val ANSI_RESET = "\u001B[0m"

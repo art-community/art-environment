@@ -1,8 +1,3 @@
-import org.gradle.api.Project
-import org.zeroturnaround.exec.ProcessExecutor
-import java.io.ByteArrayOutputStream
-import java.nio.file.Path
-
 /*
  * ART
  *
@@ -20,6 +15,16 @@ import java.nio.file.Path
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package service
+
+import logger.attention
+import logger.error
+import org.gradle.api.Project
+import org.zeroturnaround.exec.ProcessExecutor
+import plugin.plugin
+import java.io.ByteArrayOutputStream
+import java.nio.file.Path
 
 fun Project.execute(vararg command: String) = execute(plugin.paths.runtimeDirectory, *command)
 

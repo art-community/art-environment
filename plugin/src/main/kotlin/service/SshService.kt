@@ -16,18 +16,20 @@
  * limitations under the License.
  */
 
+package service
+
+import constants.LOCALHOST
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.sftp.OpenMode.*
 import net.schmizz.sshj.sftp.SFTPClient
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier
-import org.gradle.api.model.ObjectFactory
 import java.nio.file.Files.createDirectories
 import java.nio.file.Path
 import java.time.Duration
 import javax.inject.Inject
 
-open class SshConfiguration @Inject constructor(objectFactory: ObjectFactory) {
+open class SshConfiguration @Inject constructor() {
     var host: String = LOCALHOST
         private set
 

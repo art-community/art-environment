@@ -16,25 +16,26 @@
  * limitations under the License.
  */
 
-repositories {
-    mavenCentral()
-}
+package configuration
 
-plugins {
-    `kotlin-dsl`
-}
+import javax.inject.Inject
 
-gradlePlugin {
-    plugins {
-        register("environment") {
-            id = "environment"
-            implementationClass = "EnvironmentPlugin"
-        }
+open class ProjectConfiguration @Inject constructor(val name: String) {
+    var url: String? = null
+        private set
+    var version: String? = null
+        private set
+
+    fun from(url: String, version: String) {
+        this.url = url
+        this.version = version
     }
-}
 
-dependencies {
-    implementation("org.eclipse.jgit:org.eclipse.jgit:+")
-    implementation("org.zeroturnaround:zt-exec:+")
-    implementation("com.hierynomus", "sshj", "+")
+    fun url(url: String) {
+        this.url = url
+    }
+
+    fun version(version: String) {
+        this.version = version
+    }
 }

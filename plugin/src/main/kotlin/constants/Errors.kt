@@ -16,3 +16,9 @@
  * limitations under the License.
  */
 
+package constants
+
+import org.gradle.api.GradleException
+import java.nio.file.Path
+
+fun fileCreationException(path: Path) = GradleException("Unable to create file: $path")

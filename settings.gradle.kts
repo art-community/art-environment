@@ -18,6 +18,8 @@
 
 rootProject.name = "environment"
 
+includeBuild("plugin")
+
 when (file("local").exists()) {
     true -> include("local")
     false -> include("global")

@@ -16,6 +16,12 @@
  * limitations under the License.
  */
 
+package plugin
+
+import configuration.PathsConfiguration
+import configurator.configureTasks
+import constants.*
+import extension.ArtExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

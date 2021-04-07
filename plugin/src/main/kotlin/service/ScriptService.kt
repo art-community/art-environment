@@ -16,12 +16,19 @@
  * limitations under the License.
  */
 
-import org.gradle.api.Project
+package service
 
-fun Project.runTarantool(lua: String, name: String) {
-    val windowsScript = rootProject.projectDir.resolve("scripts").resolve("tarantool.bat")
-    val workingDirectory = projectDir.resolve("runtime").resolve(name)
-    if (!workingDirectory.exists()) workingDirectory.mkdirs()
-    val luaScript = workingDirectory.resolve("initial.lua")
-    luaScript.writeText(lua)
-}
+import constants.DOT_BAT
+import constants.DOT_LUA
+import constants.DOT_SH
+import java.nio.file.Path
+import java.nio.file.Paths
+
+
+fun writeScript(path: Path, content: String) = path.write(content)
+
+fun Path.bat(): Path = Paths.get("${toAbsolutePath()}$DOT_BAT")
+
+fun Path.sh(): Path = Paths.get("${toAbsolutePath()}$DOT_SH")
+
+fun Path.lua(): Path = Paths.get("${toAbsolutePath()}$DOT_LUA")
