@@ -28,6 +28,7 @@ const val JAVA = "java"
 const val KOTLIN = "kotlin"
 const val TARANTOOL = "tarantool"
 const val GENERATOR = "generator"
+const val GRADLE = "gradle"
 const val PROJECTS = "projects"
 const val DEFAULT_URL = "https://github.com/art-community"
 const val SLASH = "/"
@@ -70,7 +71,11 @@ const val STDERR_LOG = ".stderr.log"
 const val DOT_BAT = ".bat"
 const val DOT_SH = ".sh"
 const val DOT_LUA = ".lua"
+const val NEW_LINE = "\r\n"
 
+const val ADD_REFS_HEADS = "+refs/heads/*:refs/heads/*"
+const val ADD_REFS_TAGS = "+refs/tags/*:refs/tags/*"
+const val ORIGIN = "origin"
 
 const val WIN = "win";
 const val MAC = "mac";
@@ -99,16 +104,16 @@ val isAix: Boolean
 val isSunos: Boolean
     get() = OS.contains(SUNOS)
 
-
 val EMPTY_ACTION = Action<Any> { }
-
-val PROJECT_SOURCES = mapOf(
-        JAVA to "art-java",
-        KOTLIN to "art-kotlin",
-        TARANTOOL to "art-tarantool",
-        GENERATOR to "art-generator"
-)
 
 val SUDO_LOG = Regex("\\[sudo]\\spassword\\sfor.+?:")
 val REMOTE_RUNTIME_DIRECTORY = { project: String -> "~/art/$project/runtime" }
 val REMOTE_SCRIPTS_DIRECTORY = { project: String -> "~/art/$project/scripts" }
+
+val PROJECT_NAMES = mapOf(
+        JAVA to "art-java",
+        KOTLIN to "art-kotlin",
+        TARANTOOL to "art-tarantool",
+        GENERATOR to "art-generator",
+        GRADLE to "art-gradle",
+)

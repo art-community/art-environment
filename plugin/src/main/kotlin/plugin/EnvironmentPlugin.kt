@@ -44,7 +44,8 @@ class EnvironmentPlugin : Plugin<Project> {
                 scriptsDirectory = plugin.project.projectDir.resolve(SCRIPTS).toPath(),
                 projectsDirectory = plugin.project.projectDir.resolve(PROJECTS).toPath(),
                 remoteRuntimeDirectory = REMOTE_RUNTIME_DIRECTORY(project.name),
-                remoteScriptsDirectory = REMOTE_SCRIPTS_DIRECTORY(project.name))
+                remoteScriptsDirectory = REMOTE_SCRIPTS_DIRECTORY(project.name)
+        )
         extension = extensions.create(ART, ArtExtension::class.java, this)
         configureTasks()
     }

@@ -29,7 +29,7 @@ import java.nio.file.Paths
 fun Project.configureTasks() {
     tasks.register(CONFIGURE) {
         group = ART
-        doLast { plugin.project.configureProjects() }
+        doLast { configureProjects() }
     }
     tasks.register("debug") {
         doLast {

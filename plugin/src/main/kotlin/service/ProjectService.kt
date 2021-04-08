@@ -31,25 +31,15 @@ import org.eclipse.jgit.lib.SubmoduleConfig.FetchRecurseSubmodulesMode.YES
 import org.eclipse.jgit.merge.MergeStrategy.THEIRS
 import org.eclipse.jgit.transport.RefSpec
 import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
-import org.gradle.api.Project
 import plugin.plugin
 
-const val REFS_HEADS = "refs/heads/"
-const val REFS_TAGS = "refs/tags/"
-const val ADD_REFS_HEADS = "+refs/heads/*:refs/heads/*"
-const val ADD_REFS_TAGS = "+refs/tags/*:refs/tags/*"
-const val ORIGIN = "origin"
-const val DOT_GIT = ".git"
-const val CURRENT_BRANCH_LAST_COMMIT_REV = "HEAD^{tree}"
-const val CURRENT_BRANCH_PREVIOUS_COMMIT_REV = "HEAD~1^{tree}"
 
-
-fun Project.configureProjects() = plugin.extension.run {
+fun configureProjects() = plugin.extension.run {
     val settings = buildString {
-        append("""rootProject.name = "projects"""")
-        append("\n")
+        appendLine(PROJECTS_NAME_TEMPLATE)
+        if (projects.contains(GENERATOR)) appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE]!!))
         projects.forEach { project ->
-            append("""includeBuild("${PROJECT_SOURCES[project]}")""").append("\n")
+            appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[project]!!))
             when (project) {
                 JAVA -> javaConfiguration.configure()
                 KOTLIN -> kotlinConfiguration.configure()
@@ -58,22 +48,15 @@ fun Project.configureProjects() = plugin.extension.run {
             }
         }
     }
-    val project = buildString {
-        append(
-                """
-                    tasks.withType(type = Wrapper::class) {
-                        gradleVersion = "7.0-rc-2"
-                    }
-                """.trimIndent()
-        )
-    }
-    plugin.paths.projectsDirectory.resolve("settings.gradle.kts").write(settings)
-    plugin.paths.projectsDirectory.resolve("build.gradle.kts").write(project)
+    val project = buildString { append(GRADLE_TASK_TEMPLATE) }
+    plugin.paths.projectsDirectory.resolve(SETTINGS_GRADLE).write(settings)
+    plugin.paths.projectsDirectory.resolve(BUILD_GRADLE).write(project)
 }
 
 private fun ProjectConfiguration.configure() {
-    val directory = plugin.paths.projectsDirectory.resolve(PROJECT_SOURCES[name])
-    val url = url ?: "${plugin.extension.defaultUrl}/${PROJECT_SOURCES[name]}"
+    val projectName = PROJECT_NAMES[name]!!
+    val directory = plugin.paths.projectsDirectory.resolve(projectName)
+    val url = url ?: "${plugin.extension.defaultUrl}/$projectName"
     val clone = {
         cloneRepository()
                 .setDirectory(directory.toFile())
@@ -90,41 +73,38 @@ private fun ProjectConfiguration.configure() {
         return
     }
     open(directory.toFile()).use { repository ->
-        val hasChanges = repository
-                .status()
-                .call()
-                .uncommittedChanges
-                .isNotEmpty()
-        if (hasChanges) {
-            plugin.project.error("${repository.repository} has changes. Please stash it")
-            return
-        }
-        try {
-            repository.fetch()
-                    .setRefSpecs(RefSpec(ADD_REFS_HEADS), RefSpec(ADD_REFS_TAGS))
-                    .setTagOpt(FETCH_TAGS)
-                    .setRemoveDeletedRefs(true)
-                    .setForceUpdate(true)
-                    .setRecurseSubmodules(YES)
-                    .call()
-            version?.let { reference ->
-                repository
-                        .checkout()
-                        .setName(reference)
-                        .setUpstreamMode(TRACK)
-                        .setStartPoint("$ORIGIN/$reference")
-                        .call()
+        with(repository) {
+            if (status().call().uncommittedChanges.isNotEmpty()) {
+                plugin.project.error("$repository has changes. Please stash it")
+                return
             }
-            repository.pull()
-                    .setFastForward(FF)
-                    .setTagOpt(FETCH_TAGS)
-                    .setRecurseSubmodules(YES)
-                    .setRebase(true)
-                    .setRebase(REBASE)
-                    .setStrategy(THEIRS)
-                    .call()
-        } catch (exception: RepositoryNotFoundException) {
-            clone()
+            try {
+                fetch()
+                        .setRefSpecs(RefSpec(ADD_REFS_HEADS), RefSpec(ADD_REFS_TAGS))
+                        .setTagOpt(FETCH_TAGS)
+                        .setRemoveDeletedRefs(true)
+                        .setForceUpdate(true)
+                        .setRecurseSubmodules(YES)
+                        .call()
+                version?.let { reference ->
+                    checkout()
+                            .setName(reference)
+                            .setUpstreamMode(TRACK)
+                            .setStartPoint("$ORIGIN/$reference")
+                            .call()
+                }
+                pull()
+                        .setFastForward(FF)
+                        .setTagOpt(FETCH_TAGS)
+                        .setRecurseSubmodules(YES)
+                        .setRebase(true)
+                        .setRebase(REBASE)
+                        .setRemote(ORIGIN)
+                        .setStrategy(THEIRS)
+                        .call()
+            } catch (exception: RepositoryNotFoundException) {
+                clone()
+            }
         }
     }
 }
