@@ -79,9 +79,9 @@ fun Project.infoOutput() = object : OutputStream() {
 
     override fun write(byte: Int) = buffer.write(byte)
 
-    override fun flush() = info(buffer.toString())
+    override fun flush() = attention(buffer.toString())
 
-    override fun close() = info(buffer.toString())
+    override fun close() = attention(buffer.toString())
 }
 
 fun Project.debug(message: String, color: LogMessageColor = YELLOW) {

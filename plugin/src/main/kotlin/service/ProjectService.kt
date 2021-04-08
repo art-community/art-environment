@@ -20,6 +20,7 @@ package service
 
 import configuration.ProjectConfiguration
 import constants.*
+import logger.attention
 import logger.error
 import logger.infoOutput
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode.TRACK
@@ -28,15 +29,12 @@ import org.eclipse.jgit.api.Git.open
 import org.eclipse.jgit.api.MergeCommand.FastForwardMode.FF
 import org.eclipse.jgit.errors.RepositoryNotFoundException
 import org.eclipse.jgit.lib.BranchConfig.BranchRebaseMode.REBASE
-import org.eclipse.jgit.lib.ProgressMonitor
 import org.eclipse.jgit.lib.SubmoduleConfig.FetchRecurseSubmodulesMode.YES
 import org.eclipse.jgit.lib.TextProgressMonitor
 import org.eclipse.jgit.merge.MergeStrategy.THEIRS
 import org.eclipse.jgit.transport.RefSpec
-import org.eclipse.jgit.transport.SideBandOutputStream
 import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
 import plugin.plugin
-import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 
 
@@ -46,7 +44,7 @@ fun configureProjects() = plugin.extension.run {
         if (projects.contains(GENERATOR)) {
             appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE]!!))
             ProjectConfiguration(GRADLE)
-                    .apply { from(generatorConfiguration.url ?: DEFAULT_URL, generatorConfiguration.version!!) }
+                    .apply { generatorConfiguration.version?.let(::version) }
                     .configure()
         }
         projects.forEach { project ->
@@ -60,65 +58,72 @@ fun configureProjects() = plugin.extension.run {
         }
     }
     val project = buildString { append(GRADLE_TASK_TEMPLATE) }
-    plugin.paths.projectsDirectory.resolve(SETTINGS_GRADLE).write(settings)
-    plugin.paths.projectsDirectory.resolve(BUILD_GRADLE).write(project)
+    plugin.paths.apply {
+        projectsDirectory.resolve(SETTINGS_GRADLE).write(settings)
+        projectsDirectory.resolve(BUILD_GRADLE).write(project)
+    }
 }
 
 private fun ProjectConfiguration.configure() {
-    val projectName = PROJECT_NAMES[name]!!
-    val directory = plugin.paths.projectsDirectory.resolve(projectName)
-    val url = url ?: "${plugin.extension.defaultUrl}/$projectName"
-    val clone = {
-        cloneRepository()
-                .setDirectory(directory.toFile())
-                .setBranch(version)
-                .setURI(url)
-                .setRemote(ORIGIN)
-                .setCloneAllBranches(true)
-                .setCloneSubmodules(true)
-                .setProgressMonitor(TextProgressMonitor(OutputStreamWriter(plugin.project.infoOutput())))
-                .call()
-                .close()
-    }
-    if (!directory.toFile().exists()) {
-        clone()
-        return
-    }
-    open(directory.toFile()).use { repository ->
-        with(repository) {
-            if (status().call().uncommittedChanges.isNotEmpty()) {
-                plugin.project.error("$repository has changes. Please stash it")
-                return
-            }
-            try {
-                fetch()
-                        .setRefSpecs(RefSpec(ADD_REFS_HEADS), RefSpec(ADD_REFS_TAGS))
-                        .setTagOpt(FETCH_TAGS)
-                        .setRemoveDeletedRefs(true)
-                        .setForceUpdate(true)
-                        .setRecurseSubmodules(YES)
-                        .setProgressMonitor(TextProgressMonitor(OutputStreamWriter(plugin.project.infoOutput())))
-                        .call()
-                version?.let { reference ->
-                    checkout()
-                            .setName(reference)
-                            .setUpstreamMode(TRACK)
-                            .setStartPoint("$ORIGIN/$reference")
-                            .setProgressMonitor(TextProgressMonitor(OutputStreamWriter(plugin.project.infoOutput())))
-                            .call()
+    with(plugin) {
+        val projectName = PROJECT_NAMES[name]!!
+        val directory = paths.projectsDirectory.resolve(projectName)
+        val url = url ?: "${extension.defaultUrl}/$projectName"
+        val progressMonitor = TextProgressMonitor(OutputStreamWriter(project.infoOutput()))
+        val clone = {
+            project.attention("Clone: $url into $directory")
+            cloneRepository()
+                    .setDirectory(directory.toFile())
+                    .setBranch(version)
+                    .setURI(url)
+                    .setRemote(ORIGIN)
+                    .setCloneAllBranches(true)
+                    .setCloneSubmodules(true)
+                    .setProgressMonitor(progressMonitor)
+                    .call()
+                    .close()
+        }
+        if (!directory.toFile().exists()) {
+            clone()
+            return
+        }
+        open(directory.toFile()).use { repository ->
+            with(repository) {
+                if (status().call().uncommittedChanges.isNotEmpty()) {
+                    project.error("$repository has changes. Please stash it")
+                    return
                 }
-                pull()
-                        .setFastForward(FF)
-                        .setTagOpt(FETCH_TAGS)
-                        .setRecurseSubmodules(YES)
-                        .setRebase(true)
-                        .setRebase(REBASE)
-                        .setRemote(ORIGIN)
-                        .setStrategy(THEIRS)
-                        .setProgressMonitor(TextProgressMonitor(OutputStreamWriter(plugin.project.infoOutput())))
-                        .call()
-            } catch (exception: RepositoryNotFoundException) {
-                clone()
+                try {
+                    project.attention("Fetch: $directory")
+                    fetch()
+                            .setRefSpecs(RefSpec(ADD_REFS_HEADS), RefSpec(ADD_REFS_TAGS))
+                            .setTagOpt(FETCH_TAGS)
+                            .setRemoveDeletedRefs(true)
+                            .setForceUpdate(true)
+                            .setRecurseSubmodules(YES)
+                            .call()
+                    version?.let { reference ->
+                        project.attention("Checkout: '$version' in $directory")
+                        checkout()
+                                .setName(reference)
+                                .setUpstreamMode(TRACK)
+                                .setStartPoint("$ORIGIN/$reference")
+                                .setProgressMonitor(progressMonitor)
+                                .call()
+                    }
+                    project.attention("Pull: $directory")
+                    pull()
+                            .setFastForward(FF)
+                            .setTagOpt(FETCH_TAGS)
+                            .setRecurseSubmodules(YES)
+                            .setRebase(true)
+                            .setRebase(REBASE)
+                            .setRemote(ORIGIN)
+                            .setStrategy(THEIRS)
+                            .call()
+                } catch (exception: RepositoryNotFoundException) {
+                    clone()
+                }
             }
         }
     }
