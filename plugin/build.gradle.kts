@@ -21,7 +21,9 @@ repositories {
 }
 
 plugins {
+    idea
     `kotlin-dsl`
+    `java-gradle-plugin`
 }
 
 tasks.withType(type = Wrapper::class) {
