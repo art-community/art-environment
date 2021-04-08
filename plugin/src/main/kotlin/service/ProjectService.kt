@@ -21,23 +21,34 @@ package service
 import configuration.ProjectConfiguration
 import constants.*
 import logger.error
+import logger.infoOutput
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode.TRACK
 import org.eclipse.jgit.api.Git.cloneRepository
 import org.eclipse.jgit.api.Git.open
 import org.eclipse.jgit.api.MergeCommand.FastForwardMode.FF
 import org.eclipse.jgit.errors.RepositoryNotFoundException
 import org.eclipse.jgit.lib.BranchConfig.BranchRebaseMode.REBASE
+import org.eclipse.jgit.lib.ProgressMonitor
 import org.eclipse.jgit.lib.SubmoduleConfig.FetchRecurseSubmodulesMode.YES
+import org.eclipse.jgit.lib.TextProgressMonitor
 import org.eclipse.jgit.merge.MergeStrategy.THEIRS
 import org.eclipse.jgit.transport.RefSpec
+import org.eclipse.jgit.transport.SideBandOutputStream
 import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
 import plugin.plugin
+import java.io.BufferedWriter
+import java.io.OutputStreamWriter
 
 
 fun configureProjects() = plugin.extension.run {
     val settings = buildString {
         appendLine(PROJECTS_NAME_TEMPLATE)
-        if (projects.contains(GENERATOR)) appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE]!!))
+        if (projects.contains(GENERATOR)) {
+            appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE]!!))
+            ProjectConfiguration(GRADLE)
+                    .apply { from(generatorConfiguration.url ?: DEFAULT_URL, generatorConfiguration.version!!) }
+                    .configure()
+        }
         projects.forEach { project ->
             appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[project]!!))
             when (project) {
@@ -65,6 +76,7 @@ private fun ProjectConfiguration.configure() {
                 .setRemote(ORIGIN)
                 .setCloneAllBranches(true)
                 .setCloneSubmodules(true)
+                .setProgressMonitor(TextProgressMonitor(OutputStreamWriter(plugin.project.infoOutput())))
                 .call()
                 .close()
     }
@@ -85,12 +97,14 @@ private fun ProjectConfiguration.configure() {
                         .setRemoveDeletedRefs(true)
                         .setForceUpdate(true)
                         .setRecurseSubmodules(YES)
+                        .setProgressMonitor(TextProgressMonitor(OutputStreamWriter(plugin.project.infoOutput())))
                         .call()
                 version?.let { reference ->
                     checkout()
                             .setName(reference)
                             .setUpstreamMode(TRACK)
                             .setStartPoint("$ORIGIN/$reference")
+                            .setProgressMonitor(TextProgressMonitor(OutputStreamWriter(plugin.project.infoOutput())))
                             .call()
                 }
                 pull()
@@ -101,6 +115,7 @@ private fun ProjectConfiguration.configure() {
                         .setRebase(REBASE)
                         .setRemote(ORIGIN)
                         .setStrategy(THEIRS)
+                        .setProgressMonitor(TextProgressMonitor(OutputStreamWriter(plugin.project.infoOutput())))
                         .call()
             } catch (exception: RepositoryNotFoundException) {
                 clone()

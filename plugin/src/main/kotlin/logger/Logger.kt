@@ -20,6 +20,8 @@ package logger
 
 import logger.LogMessageColor.*
 import org.gradle.api.Project
+import java.io.ByteArrayOutputStream
+import java.io.OutputStream
 
 const val ANSI_RESET = "\u001B[0m"
 
@@ -70,6 +72,16 @@ fun Project.error(message: String, color: LogMessageColor = RED) {
 
 fun Project.info(message: String, color: LogMessageColor = BLACK) {
     logger.info("${name(color)} ${color.code}$message$ANSI_RESET")
+}
+
+fun Project.infoOutput() = object : OutputStream() {
+    val buffer = ByteArrayOutputStream()
+
+    override fun write(byte: Int) = buffer.write(byte)
+
+    override fun flush() = info(buffer.toString())
+
+    override fun close() = info(buffer.toString())
 }
 
 fun Project.debug(message: String, color: LogMessageColor = YELLOW) {
