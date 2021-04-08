@@ -37,11 +37,14 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
 
     val kotlinConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, KOTLIN)
 
-    val generatorConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, GENERATOR)
+    val generatorConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, GRADLE_PLUGIN)
+
+    val gradlePluginConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, GRADLE_PLUGIN)
 
     val tarantoolConfiguration = objectFactory.newInstance(TarantoolConfiguration::class.java)
 
     val sshConfiguration = objectFactory.newInstance(SshConfiguration::class.java)
+
 
     fun url(url: String) {
         this.defaultUrl = url
@@ -60,6 +63,11 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
     fun generator(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {
         projects += GENERATOR
         configurator.execute(generatorConfiguration)
+    }
+
+    fun gradlePlugin(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {
+        projects += GRADLE_PLUGIN
+        configurator.execute(gradlePluginConfiguration)
     }
 
     fun tarantool(configurator: Action<in TarantoolConfiguration>) {

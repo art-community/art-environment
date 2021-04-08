@@ -21,8 +21,6 @@ package configurator
 import constants.ART
 import constants.CONFIGURE
 import org.gradle.api.Project
-import plugin.plugin
-import service.configureProjects
 import service.execute
 import java.nio.file.Paths
 

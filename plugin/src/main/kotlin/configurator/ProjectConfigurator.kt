@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package service
+package configurator
 
 import configuration.ProjectConfiguration
 import constants.*
@@ -32,14 +32,15 @@ import org.eclipse.jgit.merge.MergeStrategy.THEIRS
 import org.eclipse.jgit.transport.RefSpec
 import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
 import plugin.plugin
-
+import service.write
 
 fun configureProjects() = plugin.extension.run {
     val settings = buildString {
         appendLine(PROJECTS_NAME_TEMPLATE)
         if (projects.contains(GENERATOR)) {
-            appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE]!!))
-            ProjectConfiguration(GRADLE)
+            appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE_PLUGIN]!!))
+            if (projects.contains(GRADLE_PLUGIN)) gradlePluginConfiguration
+            ProjectConfiguration(GRADLE_PLUGIN)
                     .apply { generatorConfiguration.version?.let(::version) }
                     .configure()
         }
