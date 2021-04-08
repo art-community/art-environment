@@ -12,4 +12,6 @@ To use it do next:
 * `cd local`
 * `cd projects`
 * `gradlew`
-4. Open in youre IDE and import Gradle projects `art-environment` and `projects`
+4. Open in youre IDE and import Gradle projects `art-environment` and `projects` (`local/projects/settings.gradle.kts`)
+
+Do not import every project separately, it will break the build.  
