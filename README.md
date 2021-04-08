@@ -7,9 +7,7 @@ To use it do next:
 1. Clone project: `git clone https://github.com/art-community/art-environment`
 2. Configure environment:
  * `cd art-environment`
- * `gradlew`
- * `gradlew prepareLocalEnvironment` - this will craete local Git ignored directory "local"
- * `gradlew configure` - this will clone all projects that are declared in local/build.gradle.kts
+ * `prepare-local`
 3. Check cloned projects Gradle configuration: 
 * `cd local`
 * `cd projects`
