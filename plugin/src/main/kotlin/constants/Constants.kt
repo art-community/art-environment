@@ -28,6 +28,7 @@ const val JAVA = "java"
 const val KOTLIN = "kotlin"
 const val TARANTOOL = "tarantool"
 const val GENERATOR = "generator"
+const val EXAMPLE = "example"
 const val GRADLE_PLUGIN = "gradle-plugin"
 const val PROJECTS = "projects"
 const val DEFAULT_URL = "https://github.com/art-community"
@@ -116,4 +117,5 @@ val PROJECT_NAMES = mapOf(
         TARANTOOL to "art-tarantool",
         GENERATOR to "art-generator",
         GRADLE_PLUGIN to "art-gradle",
+        EXAMPLE to "art-example",
 )

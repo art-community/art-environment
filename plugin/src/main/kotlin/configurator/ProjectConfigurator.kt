@@ -37,12 +37,12 @@ import service.write
 fun configureProjects() = plugin.extension.run {
     val settings = buildString {
         appendLine(PROJECTS_NAME_TEMPLATE)
-        if (projects.contains(GENERATOR)) {
+        if (projects.contains(EXAMPLE)) {
             appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE_PLUGIN]!!))
-            if (projects.contains(GRADLE_PLUGIN)) gradlePluginConfiguration
-            ProjectConfiguration(GRADLE_PLUGIN)
-                    .apply { generatorConfiguration.version?.let(::version) }
-                    .configure()
+            when (projects.contains(GRADLE_PLUGIN)) {
+                true -> gradlePluginConfiguration.configure()
+                false -> ProjectConfiguration(GRADLE_PLUGIN).apply { generatorConfiguration.version?.let(::version) }.configure()
+            }
         }
         projects.forEach { project ->
             appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[project]!!))
@@ -51,6 +51,7 @@ fun configureProjects() = plugin.extension.run {
                 KOTLIN -> kotlinConfiguration.configure()
                 TARANTOOL -> tarantoolConfiguration.configure()
                 GENERATOR -> generatorConfiguration.configure()
+                EXAMPLE -> exampleConfiguration.configure()
             }
         }
     }

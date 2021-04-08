@@ -37,7 +37,9 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
 
     val kotlinConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, KOTLIN)
 
-    val generatorConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, GRADLE_PLUGIN)
+    val generatorConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, GENERATOR)
+
+    val exampleConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, EXAMPLE)
 
     val gradlePluginConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, GRADLE_PLUGIN)
 
@@ -68,6 +70,11 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
     fun gradlePlugin(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {
         projects += GRADLE_PLUGIN
         configurator.execute(gradlePluginConfiguration)
+    }
+
+    fun example(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {
+        projects += EXAMPLE
+        configurator.execute(exampleConfiguration)
     }
 
     fun tarantool(configurator: Action<in TarantoolConfiguration>) {
