@@ -33,6 +33,8 @@ import org.eclipse.jgit.transport.RefSpec
 import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
 import plugin.plugin
 import service.write
+import java.nio.file.Files.copy
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 fun configureProjects() = plugin.extension.run {
     val settings = buildString {
@@ -59,6 +61,9 @@ fun configureProjects() = plugin.extension.run {
     plugin.paths.apply {
         projectsDirectory.resolve(SETTINGS_GRADLE).write(settings)
         projectsDirectory.resolve(BUILD_GRADLE).write(project)
+        copy(plugin.project.rootDir.resolve(GRADLE).toPath(), projectsDirectory.resolve(GRADLE), REPLACE_EXISTING)
+        copy(plugin.project.rootDir.resolve(GRADLEW).toPath(), projectsDirectory.resolve(GRADLEW), REPLACE_EXISTING)
+        copy(plugin.project.rootDir.resolve(GRADLEW_BAT).toPath(), projectsDirectory.resolve(GRADLEW_BAT), REPLACE_EXISTING)
     }
 }
 

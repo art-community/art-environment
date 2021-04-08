@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-rootProject.name = "environment"
+rootProject.name = "art-environment"
 
 includeBuild("plugin")
 
