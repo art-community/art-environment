@@ -18,10 +18,10 @@
 
 package logger
 
+import constants.LOG_TEMPLATE
 import logger.LogMessageColor.*
 import org.gradle.api.Project
-import java.io.ByteArrayOutputStream
-import java.io.OutputStream
+
 
 const val ANSI_RESET = "\u001B[0m"
 
@@ -46,46 +46,36 @@ enum class LogMessageColor(val code: String) {
 
 fun message(message: String, color: LogMessageColor) = "${color.code}$message$ANSI_RESET"
 
-fun Project.quiet(message: String, color: LogMessageColor = BLACK) {
-    logger.quiet("${name(color)} ${color.code}$message$ANSI_RESET")
+fun Project.logger(context: String) = ContestedLogger(context, this)
+
+fun Project.quiet(message: String, context: String = project.name, color: LogMessageColor = BLACK) {
+    logger.quiet("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
 }
 
-fun Project.success(message: String, color: LogMessageColor = GREEN_BOLD) {
-    logger.quiet("${name(color)} ${color.code}$message$ANSI_RESET")
+fun Project.success(message: String, context: String = project.name, color: LogMessageColor = GREEN_BOLD) {
+    logger.quiet("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
 }
 
-fun Project.warning(message: String, color: LogMessageColor = YELLOW_BOLD) {
-    logger.quiet("${name(color)} ${color.code}$message$ANSI_RESET")
+fun Project.warning(message: String, context: String = project.name, color: LogMessageColor = YELLOW_BOLD) {
+    logger.quiet("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
 }
 
-fun Project.attention(message: String, color: LogMessageColor = CYAN_BOLD) {
-    logger.quiet("${name(color)} ${color.code}$message$ANSI_RESET")
+fun Project.attention(message: String, context: String = project.name, color: LogMessageColor = CYAN_BOLD) {
+    logger.quiet("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
 }
 
-fun Project.additionalAttention(message: String, color: LogMessageColor = PURPLE_BOLD) {
-    logger.quiet("${name(color)} ${color.code}$message$ANSI_RESET")
+fun Project.additional(message: String, context: String = project.name, color: LogMessageColor = PURPLE_BOLD) {
+    logger.quiet("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
 }
 
-fun Project.error(message: String, color: LogMessageColor = RED) {
-    logger.error("${name(color)} ${color.code}$message$ANSI_RESET")
+fun Project.error(message: String, context: String = project.name, color: LogMessageColor = RED) {
+    logger.error("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
 }
 
-fun Project.info(message: String, color: LogMessageColor = BLACK) {
-    logger.info("${name(color)} ${color.code}$message$ANSI_RESET")
+fun Project.info(message: String, context: String = project.name, color: LogMessageColor = BLACK) {
+    logger.info("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
 }
 
-fun Project.infoOutput() = object : OutputStream() {
-    val buffer = ByteArrayOutputStream()
-
-    override fun write(byte: Int) = buffer.write(byte)
-
-    override fun flush() = attention(buffer.toString())
-
-    override fun close() = attention(buffer.toString())
+fun Project.debug(message: String, context: String = project.name, color: LogMessageColor = YELLOW) {
+    logger.debug("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
 }
-
-fun Project.debug(message: String, color: LogMessageColor = YELLOW) {
-    logger.debug("${name(color)} ${color.code}$message$ANSI_RESET")
-}
-
-private fun Project.name(color: LogMessageColor) = message("[$name]:", color)

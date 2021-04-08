@@ -8,3 +8,5 @@ val GRADLE_TASK_TEMPLATE =
                     }
         """.trimIndent()
 val INCLUDE_BUILD_TEMPLATE = { name: String -> """includeBuild("$name")""" }
+
+val LOG_TEMPLATE = { context: String, line: String -> "($context): $line" }

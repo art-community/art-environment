@@ -20,9 +20,7 @@ package service
 
 import configuration.ProjectConfiguration
 import constants.*
-import logger.attention
-import logger.error
-import logger.infoOutput
+import logger.logger
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode.TRACK
 import org.eclipse.jgit.api.Git.cloneRepository
 import org.eclipse.jgit.api.Git.open
@@ -30,12 +28,10 @@ import org.eclipse.jgit.api.MergeCommand.FastForwardMode.FF
 import org.eclipse.jgit.errors.RepositoryNotFoundException
 import org.eclipse.jgit.lib.BranchConfig.BranchRebaseMode.REBASE
 import org.eclipse.jgit.lib.SubmoduleConfig.FetchRecurseSubmodulesMode.YES
-import org.eclipse.jgit.lib.TextProgressMonitor
 import org.eclipse.jgit.merge.MergeStrategy.THEIRS
 import org.eclipse.jgit.transport.RefSpec
 import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
 import plugin.plugin
-import java.io.OutputStreamWriter
 
 
 fun configureProjects() = plugin.extension.run {
@@ -69,9 +65,9 @@ private fun ProjectConfiguration.configure() {
         val projectName = PROJECT_NAMES[name]!!
         val directory = paths.projectsDirectory.resolve(projectName)
         val url = url ?: "${extension.defaultUrl}/$projectName"
-        val progressMonitor = TextProgressMonitor(OutputStreamWriter(project.infoOutput()))
+        val logger = project.logger(projectName)
         val clone = {
-            project.attention("Clone: $url into $directory")
+            logger.attention("Clone $url")
             cloneRepository()
                     .setDirectory(directory.toFile())
                     .setBranch(version)
@@ -79,7 +75,6 @@ private fun ProjectConfiguration.configure() {
                     .setRemote(ORIGIN)
                     .setCloneAllBranches(true)
                     .setCloneSubmodules(true)
-                    .setProgressMonitor(progressMonitor)
                     .call()
                     .close()
         }
@@ -90,11 +85,11 @@ private fun ProjectConfiguration.configure() {
         open(directory.toFile()).use { repository ->
             with(repository) {
                 if (status().call().uncommittedChanges.isNotEmpty()) {
-                    project.error("$repository has changes. Please stash it")
+                    logger.error("Changes detected. Please stash, revert or commit them")
                     return
                 }
                 try {
-                    project.attention("Fetch: $directory")
+                    logger.attention("Fetch")
                     fetch()
                             .setRefSpecs(RefSpec(ADD_REFS_HEADS), RefSpec(ADD_REFS_TAGS))
                             .setTagOpt(FETCH_TAGS)
@@ -103,15 +98,14 @@ private fun ProjectConfiguration.configure() {
                             .setRecurseSubmodules(YES)
                             .call()
                     version?.let { reference ->
-                        project.attention("Checkout: '$version' in $directory")
+                        logger.attention("Checkout '$version'")
                         checkout()
                                 .setName(reference)
                                 .setUpstreamMode(TRACK)
                                 .setStartPoint("$ORIGIN/$reference")
-                                .setProgressMonitor(progressMonitor)
                                 .call()
                     }
-                    project.attention("Pull: $directory")
+                    logger.attention("Pull")
                     pull()
                             .setFastForward(FF)
                             .setTagOpt(FETCH_TAGS)
