@@ -44,7 +44,7 @@ fun configureProjects() = plugin.extension.run {
             appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE_PLUGIN]!!))
             when (projects.contains(GRADLE_PLUGIN)) {
                 true -> gradlePluginConfiguration.configure()
-                false -> ProjectConfiguration(GRADLE_PLUGIN).apply { generatorConfiguration.version?.let(::version) }.configure()
+                false -> ProjectConfiguration(GRADLE_PLUGIN).apply { exampleConfiguration.version?.let(::version) }.configure()
             }
         }
         projects.forEach { project ->
