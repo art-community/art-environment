@@ -21,16 +21,9 @@ plugins {
 }
 
 art {
-    java {
-    	version("main")
-    }    
-    kotlin {
-    	version("main")
-    }    
-    generator {
-    	version("main")
-    }    
-    example {
-    	version("main")
-    }    
+    java()
+    kotlin()
+    generator()
+    example()
+    tarantool()
 }
