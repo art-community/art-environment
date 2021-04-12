@@ -40,13 +40,8 @@ import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 fun configureProjects() = plugin.extension.run {
     val settings = buildString {
         appendLine(PROJECTS_NAME_TEMPLATE)
-        if (projects.contains(EXAMPLE)) {
-            appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE_PLUGIN]!!))
-            when (projects.contains(GRADLE_PLUGIN)) {
-                true -> gradlePluginConfiguration.configure()
-                false -> ProjectConfiguration(GRADLE_PLUGIN).apply { exampleConfiguration.version?.let(::version) }.configure()
-            }
-        }
+        appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE_PLUGIN]!!))
+        gradlePluginConfiguration.configure()
         projects.forEach { project ->
             appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[project]!!))
             when (project) {
@@ -77,6 +72,7 @@ private fun ProjectConfiguration.configure() {
         val projectName = PROJECT_NAMES[name]!!
         val directory = paths.projectsDirectory.resolve(projectName)
         val url = url ?: "${extension.defaultUrl}/$projectName"
+        val version = version ?: MAIN_BRANCH
         val logger = project.logger(projectName)
         val clone = {
             logger.attention("Clone $url")
@@ -109,14 +105,14 @@ private fun ProjectConfiguration.configure() {
                             .setForceUpdate(true)
                             .setRecurseSubmodules(YES)
                             .call()
-                    version?.let { reference ->
-                        logger.attention("Checkout '$version'")
-                        checkout()
-                                .setName(reference)
-                                .setUpstreamMode(TRACK)
-                                .setStartPoint("$ORIGIN/$reference")
-                                .call()
-                    }
+
+                    logger.attention("Checkout '$version'")
+                    checkout()
+                            .setName(version)
+                            .setUpstreamMode(TRACK)
+                            .setStartPoint("$ORIGIN/$version")
+                            .call()
+
                     logger.attention("Pull")
                     pull()
                             .setFastForward(FF)

@@ -18,16 +18,19 @@
 
 package configurator
 
-import constants.ART
-import constants.CONFIGURE
-import org.gradle.api.Project
+import constants.PROJECTS
+import constants.PUBLISHING_PROPERTIES
+import logger.attention
+import plugin.plugin
 
-fun Project.configureTasks() {
-    tasks.register(CONFIGURE) {
-        group = ART
-        doLast {
-            configureProjects()
-            configurePublishing()
-        }
+fun configurePublishing() = plugin.extension.publishingConfiguration.run {
+    if (!enabled) return@run
+    val publishingProperties = """
+        publisher.username=$username
+        publisher.password=$password
+    """.trimIndent()
+    plugin.project.projectDir.resolve(PROJECTS).resolve(PUBLISHING_PROPERTIES).apply {
+        writeText(publishingProperties)
+        plugin.project.attention("Publishing activated. Properties: $absolutePath")
     }
 }

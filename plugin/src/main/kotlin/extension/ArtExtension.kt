@@ -19,11 +19,13 @@
 package extension
 
 import configuration.ProjectConfiguration
+import configuration.PublishingConfiguration
 import configuration.TarantoolConfiguration
 import constants.*
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
+import org.gradle.kotlin.dsl.newInstance
 import service.SshConfiguration
 import javax.inject.Inject
 
@@ -33,19 +35,21 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
     var defaultUrl: String = DEFAULT_URL
         private set
 
-    val javaConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, JAVA)
+    val javaConfiguration: ProjectConfiguration = objectFactory.newInstance(JAVA)
 
-    val kotlinConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, KOTLIN)
+    val kotlinConfiguration: ProjectConfiguration = objectFactory.newInstance(KOTLIN)
 
-    val generatorConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, GENERATOR)
+    val generatorConfiguration: ProjectConfiguration = objectFactory.newInstance(GENERATOR)
 
-    val exampleConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, EXAMPLE)
+    val exampleConfiguration: ProjectConfiguration = objectFactory.newInstance(EXAMPLE)
 
-    val gradlePluginConfiguration = objectFactory.newInstance(ProjectConfiguration::class.java, GRADLE_PLUGIN)
+    val gradlePluginConfiguration: ProjectConfiguration = objectFactory.newInstance(GRADLE_PLUGIN)
 
-    val tarantoolConfiguration = objectFactory.newInstance(TarantoolConfiguration::class.java)
+    val tarantoolConfiguration: TarantoolConfiguration = objectFactory.newInstance()
 
-    val sshConfiguration = objectFactory.newInstance(SshConfiguration::class.java)
+    val sshConfiguration: SshConfiguration = objectFactory.newInstance()
+
+    val publishingConfiguration: PublishingConfiguration = objectFactory.newInstance()
 
 
     fun url(url: String) {
@@ -77,12 +81,16 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
         configurator.execute(exampleConfiguration)
     }
 
-    fun tarantool(configurator: Action<in TarantoolConfiguration>) {
+    fun tarantool(configurator: Action<in TarantoolConfiguration> = EMPTY_ACTION) {
         projects += TARANTOOL
         configurator.execute(tarantoolConfiguration)
     }
 
     fun ssh(configurator: Action<in SshConfiguration>) {
         configurator.execute(sshConfiguration)
+    }
+
+    fun publishing(configurator: Action<in PublishingConfiguration>) {
+        configurator.execute(publishingConfiguration)
     }
 }

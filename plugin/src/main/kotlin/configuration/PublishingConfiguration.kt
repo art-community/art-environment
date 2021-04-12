@@ -16,18 +16,21 @@
  * limitations under the License.
  */
 
-package configurator
+package configuration
 
-import constants.ART
-import constants.CONFIGURE
-import org.gradle.api.Project
+import javax.inject.Inject
 
-fun Project.configureTasks() {
-    tasks.register(CONFIGURE) {
-        group = ART
-        doLast {
-            configureProjects()
-            configurePublishing()
-        }
+open class PublishingConfiguration @Inject constructor() {
+    lateinit var username: String
+        private set
+    lateinit var password: String
+        private set
+    var enabled = false
+        private set
+
+    fun credentials(username: String, password: String) {
+        this.username = username
+        this.password = password
+        enabled = true
     }
 }

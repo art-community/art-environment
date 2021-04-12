@@ -17,3 +17,5 @@
  */
 
 package constants
+
+const val MAIN_BRANCH = "main"
