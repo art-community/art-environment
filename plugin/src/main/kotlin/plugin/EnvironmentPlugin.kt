@@ -37,8 +37,9 @@ class EnvironmentPlugin : Plugin<Project> {
         private set
 
     override fun apply(project: Project): Unit = project.run {
+        this@EnvironmentPlugin.project = this
+        extension = extensions.create(ART, ArtExtension::class.java, this)
         plugin = this@EnvironmentPlugin
-        plugin.project = this
         paths = PathsConfiguration(
                 runtimeDirectory = plugin.project.projectDir.resolve(RUNTIME).toPath(),
                 scriptsDirectory = plugin.project.projectDir.resolve(SCRIPTS).toPath(),
@@ -46,7 +47,6 @@ class EnvironmentPlugin : Plugin<Project> {
                 remoteRuntimeDirectory = REMOTE_RUNTIME_DIRECTORY(project.name),
                 remoteScriptsDirectory = REMOTE_SCRIPTS_DIRECTORY(project.name)
         )
-        extension = extensions.create(ART, ArtExtension::class.java, this)
         configureTasks()
     }
 }

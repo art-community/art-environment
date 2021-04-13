@@ -24,7 +24,10 @@ import logger.attention
 import plugin.plugin
 
 fun configurePublishing() = plugin.extension.publishingConfiguration.run {
-    if (!enabled) return@run
+    if (!enabled) {
+        plugin.project.projectDir.resolve(PROJECTS).resolve(PUBLISHING_PROPERTIES).delete()
+        return@run
+    }
     val publishingProperties = """
         publisher.username=$username
         publisher.password=$password

@@ -28,6 +28,7 @@ fun Project.configureTasks() {
         doLast {
             configureProjects()
             configurePublishing()
+            configureGradle()
         }
     }
 }
