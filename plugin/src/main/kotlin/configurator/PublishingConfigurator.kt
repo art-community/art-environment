@@ -21,19 +21,19 @@ package configurator
 import constants.PROJECTS
 import constants.PUBLISHING_PROPERTIES
 import logger.attention
-import plugin.plugin
+import plugin.EnvironmentPlugin
 
-fun configurePublishing() = plugin.extension.publishingConfiguration.run {
+fun EnvironmentPlugin.configurePublishing() = extension.publishingConfiguration.run {
     if (!enabled) {
-        plugin.project.projectDir.resolve(PROJECTS).resolve(PUBLISHING_PROPERTIES).delete()
+        project.projectDir.resolve(PROJECTS).resolve(PUBLISHING_PROPERTIES).delete()
         return@run
     }
     val publishingProperties = """
         publisher.username=$username
         publisher.password=$password
     """.trimIndent()
-    plugin.project.projectDir.resolve(PROJECTS).resolve(PUBLISHING_PROPERTIES).apply {
+    project.projectDir.resolve(PROJECTS).resolve(PUBLISHING_PROPERTIES).apply {
         writeText(publishingProperties)
-        plugin.project.attention("Publishing activated. Properties: $absolutePath")
+        project.attention("Publishing activated. Properties: $absolutePath")
     }
 }

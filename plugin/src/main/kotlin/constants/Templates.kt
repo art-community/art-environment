@@ -1,7 +1,7 @@
 package constants
 
 const val PROJECTS_NAME_TEMPLATE = """rootProject.name = "projects""""
-val GRADLE_TASK_TEMPLATE =
+val PROJECTS_GRADLE_BUILD_TEMPLATE =
         """
                     tasks.withType(type = Wrapper::class) {
                         gradleVersion = "7.0"

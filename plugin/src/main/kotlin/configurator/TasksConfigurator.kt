@@ -21,14 +21,17 @@ package configurator
 import constants.ART
 import constants.CONFIGURE
 import org.gradle.api.Project
+import plugin.plugin
 
 fun Project.configureTasks() {
     tasks.register(CONFIGURE) {
         group = ART
         doLast {
-            configureProjects()
-            configurePublishing()
-            configureGradle()
+            plugin.run {
+                configureProjects()
+                configurePublishing()
+                configureGradle()
+            }
         }
     }
 }
