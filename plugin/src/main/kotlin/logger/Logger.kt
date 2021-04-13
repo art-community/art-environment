@@ -72,6 +72,10 @@ fun Project.error(message: String, context: String = project.name, color: LogMes
     logger.error("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
 }
 
+fun Project.error(throwable: Throwable, context: String = project.name, color: LogMessageColor = RED) {
+    logger.error("${color.code}${LOG_TEMPLATE(context, throwable.message ?: throwable.localizedMessage)}$ANSI_RESET", throwable)
+}
+
 fun Project.info(message: String, context: String = project.name, color: LogMessageColor = BLACK) {
     logger.info("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
 }
