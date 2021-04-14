@@ -20,13 +20,13 @@ package extension
 
 import configuration.ProjectConfiguration
 import configuration.PublishingConfiguration
+import configuration.SshConfiguration
 import configuration.TarantoolConfiguration
 import constants.*
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.kotlin.dsl.newInstance
-import service.SshConfiguration
 import javax.inject.Inject
 
 open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val project: Project) {

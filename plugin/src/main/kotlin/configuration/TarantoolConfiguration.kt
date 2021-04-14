@@ -19,11 +19,12 @@
 package configuration
 
 import constants.TARANTOOL
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import javax.inject.Inject
 
 open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFactory) : ProjectConfiguration(TARANTOOL) {
-    val instances = objectFactory.domainObjectContainer(InstanceConfiguration::class.java)
+    val instances: NamedDomainObjectContainer<InstanceConfiguration> = objectFactory.domainObjectContainer(InstanceConfiguration::class.java)
 
     fun instance(name: String, lua: () -> String = { "" }) {
         instances.register(name) { lua(lua()) }

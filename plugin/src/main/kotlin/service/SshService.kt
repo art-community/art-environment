@@ -18,6 +18,7 @@
 
 package service
 
+import configuration.SshConfiguration
 import constants.LOCALHOST
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
@@ -29,32 +30,6 @@ import java.nio.file.Path
 import java.time.Duration
 import javax.inject.Inject
 
-open class SshConfiguration @Inject constructor() {
-    var host: String = LOCALHOST
-        private set
-
-    var port: Int? = null
-        private set
-
-    var user: String? = null
-        private set
-
-    var password: String? = null
-        private set
-
-    fun host(host: String) {
-        this.host = host
-    }
-
-    fun port(port: Int) {
-        this.port = port
-    }
-
-    fun credentials(user: String, password: String) {
-        this.user = user
-        this.password = password
-    }
-}
 
 fun <T> SshConfiguration.ssh(executor: SSHClient.() -> T): T {
     SSHClient().use { client ->
