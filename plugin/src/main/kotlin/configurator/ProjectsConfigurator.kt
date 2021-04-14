@@ -32,7 +32,7 @@ import org.eclipse.jgit.merge.MergeStrategy.THEIRS
 import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import plugin.EnvironmentPlugin
-import service.write
+import service.writeContent
 import java.nio.file.Files.copy
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
@@ -54,8 +54,8 @@ fun EnvironmentPlugin.configureProjects() = extension.run {
     }
     val buildTemplate = buildString { append(PROJECTS_GRADLE_BUILD_TEMPLATE) }
     paths.apply {
-        projectsDirectory.resolve(SETTINGS_GRADLE).write(settings)
-        projectsDirectory.resolve(BUILD_GRADLE).write(buildTemplate)
+        projectsDirectory.resolve(SETTINGS_GRADLE).writeContent(settings)
+        projectsDirectory.resolve(BUILD_GRADLE).writeContent(buildTemplate)
         project.copy {
             from(project.rootDir.resolve(GRADLE).toPath())
             into(projectsDirectory.resolve(GRADLE))

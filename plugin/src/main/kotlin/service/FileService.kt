@@ -31,7 +31,7 @@ fun Path.touch(): Path {
     return this
 }
 
-fun Path.write(content: String): Path {
+fun Path.writeContent(content: String): Path {
     if (parent.toFile().exists()) {
         toFile().writeText(content, charset = Charset.defaultCharset())
         return this

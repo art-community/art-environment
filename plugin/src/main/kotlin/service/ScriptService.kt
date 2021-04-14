@@ -25,7 +25,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 
-fun writeScript(path: Path, content: String) = path.write(content)
+fun writeScript(path: Path, content: String) = path.writeContent(content)
 
 fun Path.bat(): Path = Paths.get("${toAbsolutePath()}$DOT_BAT")
 

@@ -24,6 +24,7 @@ import constants.*
 import extension.ArtExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.create
 
 lateinit var plugin: EnvironmentPlugin
     private set
@@ -38,7 +39,7 @@ class EnvironmentPlugin : Plugin<Project> {
 
     override fun apply(project: Project): Unit = project.run {
         this@EnvironmentPlugin.project = this
-        extension = extensions.create(ART, ArtExtension::class.java, this)
+        extension = extensions.create(ART, this)
         plugin = this@EnvironmentPlugin
         paths = PathsConfiguration(
                 runtimeDirectory = plugin.project.projectDir.resolve(RUNTIME).toPath(),
