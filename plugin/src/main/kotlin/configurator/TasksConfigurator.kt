@@ -19,9 +19,11 @@
 package configurator
 
 import constants.ART
+import constants.BOOTSTRAP_TARANTOOL
 import constants.CONFIGURE
 import org.gradle.api.Project
 import plugin.plugin
+import service.bootstrapTarantool
 
 fun Project.configureTasks() {
     tasks.register(CONFIGURE) {
@@ -32,6 +34,14 @@ fun Project.configureTasks() {
                 configurePublishing()
                 configureGradle()
             }
+        }
+    }
+
+    tasks.register(BOOTSTRAP_TARANTOOL) {
+        group = ART
+        onlyIf { plugin.extension.tarantoolConfiguration.instances.isNotEmpty() }
+        doLast {
+            plugin.run { bootstrapTarantool() }
         }
     }
 }

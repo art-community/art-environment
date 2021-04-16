@@ -70,7 +70,7 @@ private fun EnvironmentPlugin.configureProject(configuration: ProjectConfigurati
     val projectName = PROJECT_NAMES[name]!!
     val directory = paths.projectsDirectory.resolve(projectName)
     val url = url ?: "${extension.defaultUrl}/$projectName"
-    val version = version ?: MAIN_BRANCH
+    val version = version ?: MAIN
     val logger = project.logger(projectName)
     val clone = {
         logger.attention("Clone $url")

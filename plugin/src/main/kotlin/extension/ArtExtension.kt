@@ -18,9 +18,9 @@
 
 package extension
 
+import configuration.ExecutableConfigurationImplementation
 import configuration.ProjectConfiguration
 import configuration.PublishingConfiguration
-import configuration.SshConfiguration
 import configuration.TarantoolConfiguration
 import constants.*
 import org.gradle.api.Action
@@ -45,9 +45,7 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
 
     val gradlePluginConfiguration: ProjectConfiguration = objectFactory.newInstance(GRADLE_PLUGIN)
 
-    val tarantoolConfiguration: TarantoolConfiguration = objectFactory.newInstance()
-
-    val sshConfiguration: SshConfiguration = objectFactory.newInstance()
+    val tarantoolConfiguration: TarantoolConfiguration = objectFactory.newInstance(objectFactory.newInstance<ExecutableConfigurationImplementation>())
 
     val publishingConfiguration: PublishingConfiguration = objectFactory.newInstance()
 
@@ -84,10 +82,6 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
     fun tarantool(configurator: Action<in TarantoolConfiguration> = EMPTY_ACTION) {
         projects += TARANTOOL
         configurator.execute(tarantoolConfiguration)
-    }
-
-    fun ssh(configurator: Action<in SshConfiguration>) {
-        configurator.execute(sshConfiguration)
     }
 
     fun publishing(configurator: Action<in PublishingConfiguration>) {

@@ -22,3 +22,5 @@ import org.gradle.api.GradleException
 import java.nio.file.Path
 
 fun fileCreationException(path: Path) = GradleException("Unable to create file: $path")
+fun wslNotAvailableException() = GradleException("WSL execution mode not available on OS: $OS")
+fun nativeNotAvailableException(prefix: String = EMPTY_STRING) = GradleException("${prefix}Native execution mode not available on OS: $OS")

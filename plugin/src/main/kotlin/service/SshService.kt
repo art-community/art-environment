@@ -18,8 +18,7 @@
 
 package service
 
-import configuration.SshConfiguration
-import constants.LOCALHOST
+import configuration.RemoteExecutionConfiguration
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.sftp.OpenMode.*
@@ -28,10 +27,9 @@ import net.schmizz.sshj.transport.verification.PromiscuousVerifier
 import java.nio.file.Files.createDirectories
 import java.nio.file.Path
 import java.time.Duration
-import javax.inject.Inject
 
 
-fun <T> SshConfiguration.ssh(executor: SSHClient.() -> T): T {
+fun <T> RemoteExecutionConfiguration.ssh(executor: SSHClient.() -> T): T {
     SSHClient().use { client ->
         with(client) {
             addHostKeyVerifier(PromiscuousVerifier())

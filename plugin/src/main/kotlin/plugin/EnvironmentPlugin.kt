@@ -43,7 +43,6 @@ class EnvironmentPlugin : Plugin<Project> {
         plugin = this@EnvironmentPlugin
         paths = PathsConfiguration(
                 runtimeDirectory = plugin.project.projectDir.resolve(RUNTIME).toPath(),
-                scriptsDirectory = plugin.project.projectDir.resolve(SCRIPTS).toPath(),
                 projectsDirectory = plugin.project.projectDir.resolve(PROJECTS).toPath(),
                 remoteRuntimeDirectory = REMOTE_RUNTIME_DIRECTORY(project.name),
                 remoteScriptsDirectory = REMOTE_SCRIPTS_DIRECTORY(project.name)

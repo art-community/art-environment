@@ -21,7 +21,6 @@ package service
 import constants.*
 import java.nio.charset.Charset
 import java.nio.file.Path
-import java.nio.file.Paths
 
 fun Path.touch(): Path {
     if (toFile().exists()) return this
@@ -43,13 +42,37 @@ fun Path.writeContent(content: String): Path {
     return this
 }
 
-fun Path.toWsl(): Path {
-    var path = this.toAbsolutePath().toString()
-    if (!isWindows) {
+fun Path.appendContent(content: String): Path {
+    if (parent.toFile().exists()) {
+        toFile().appendText(content, charset = Charset.defaultCharset())
         return this
     }
-    if (path.isBlank()) {
+    if (!parent.toFile().mkdirs()) {
+        throw fileCreationException(parent)
+    }
+    toFile().appendText(content, charset = Charset.defaultCharset())
+    return this
+}
+
+fun Path.writeContent(content: ByteArray): Path {
+    if (parent.toFile().exists()) {
+        toFile().writeBytes(content)
         return this
+    }
+    if (!parent.toFile().mkdirs()) {
+        throw fileCreationException(parent)
+    }
+    toFile().writeBytes(content)
+    return this
+}
+
+fun Path.toWsl(): String {
+    var path = this.toAbsolutePath().toString()
+    if (!isWindows) {
+        return toString()
+    }
+    if (path.isBlank()) {
+        return toString()
     }
     if (SLASH == EMPTY_STRING + path[0] || BACKWARD_SLASH == EMPTY_STRING + path[0]) {
         path = path.substring(1)
@@ -60,7 +83,7 @@ fun Path.toWsl(): Path {
                 .replace(WINDOWS_DISK_PATH_BACKWARD_SLASH_REGEX.toRegex(), SLASH)
                 .replace(BACKWARD_SLASH_REGEX.toRegex(), SLASH)
         val firstLetter: String = EMPTY_STRING + path[0]
-        return Paths.get(WSL_DISK_PREFIX + firstLetter.toLowerCase() + path.substring(1))
+        return WSL_DISK_PREFIX + firstLetter.toLowerCase() + path.substring(1)
     }
-    return this
+    return toString()
 }

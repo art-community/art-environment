@@ -18,25 +18,38 @@
 
 package configuration
 
+import constants.DEFAULT_TARANTOOL_PORT
+import constants.EMPTY_STRING
 import constants.TARANTOOL
+import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
 import javax.inject.Inject
 
-open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFactory) : ProjectConfiguration(TARANTOOL) {
+open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFactory, executableConfiguration: ExecutableConfiguration)
+    : ProjectConfiguration(TARANTOOL), ExecutableConfiguration by executableConfiguration {
     val instances: NamedDomainObjectContainer<InstanceConfiguration> = objectFactory.domainObjectContainer(InstanceConfiguration::class.java)
 
-    fun instance(name: String, lua: () -> String = { "" }) {
-        instances.register(name) { lua(lua()) }
+    fun instance(name: String, configurator: Action<in InstanceConfiguration>) {
+        instances.create(name, configurator)
     }
 
     open class InstanceConfiguration(val name: String) {
-        lateinit var lua: String
+        var port: Int = DEFAULT_TARANTOOL_PORT
             private set
+        var lua: String = EMPTY_STRING
+            private set
+
+        fun port(port: Int) {
+            this.port = port
+        }
+
+        fun lua(script: () -> String) {
+            this.lua = script()
+        }
 
         fun lua(script: String) {
             this.lua = script
         }
-
     }
 }

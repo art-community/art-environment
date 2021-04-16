@@ -16,19 +16,7 @@
  * limitations under the License.
  */
 
-package service
+package constants
 
-import constants.DOT_BAT
-import constants.DOT_LUA
-import constants.DOT_SH
-import java.nio.file.Path
-import java.nio.file.Paths
-
-
-fun writeScript(path: Path, content: String) = path.writeContent(content)
-
-fun Path.bat(): Path = Paths.get("${toAbsolutePath()}$DOT_BAT")
-
-fun Path.sh(): Path = Paths.get("${toAbsolutePath()}$DOT_SH")
-
-fun Path.lua(): Path = Paths.get("${toAbsolutePath()}$DOT_LUA")
+const val RUNTIME = "runtime"
+const val SCRIPTS = "scripts"

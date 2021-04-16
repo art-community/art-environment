@@ -1,9 +1,16 @@
 package configuration
 
 import constants.LOCALHOST
+import java.nio.file.Path
 import javax.inject.Inject
 
-open class SshConfiguration @Inject constructor() {
+open class RemoteExecutionConfiguration @Inject constructor() {
+    lateinit var executable: String
+        private set
+
+    lateinit var workingDirectory: Path
+        private set
+
     var host: String = LOCALHOST
         private set
 
@@ -27,5 +34,13 @@ open class SshConfiguration @Inject constructor() {
     fun credentials(user: String, password: String) {
         this.user = user
         this.password = password
+    }
+
+    fun executable(executable: String) {
+        this.executable = executable
+    }
+
+    fun directory(directory: Path) {
+        this.workingDirectory = directory
     }
 }

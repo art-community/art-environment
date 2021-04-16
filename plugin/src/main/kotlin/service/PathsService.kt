@@ -16,6 +16,23 @@
  * limitations under the License.
  */
 
-package constants
+package service
 
-const val MAIN_BRANCH = "main"
+import constants.*
+import java.nio.file.Path
+import java.nio.file.Paths
+
+
+fun Path.bat(): Path = Paths.get("${toAbsolutePath()}$DOT_BAT")
+
+fun Path.sh(): Path = Paths.get("${toAbsolutePath()}$DOT_SH")
+
+fun Path.lua(): Path = Paths.get("${toAbsolutePath()}$DOT_LUA")
+
+fun Path.pid(): Path = Paths.get("${toAbsolutePath()}$DOT_PID")
+
+fun Path.log(): Path = Paths.get("${toAbsolutePath()}$DOT_LOG")
+
+fun Path.stdout(): Path = Paths.get("${toAbsolutePath()}$DOT_STDOUT")
+
+fun Path.stderr(): Path = Paths.get("${toAbsolutePath()}$DOT_STDERR")

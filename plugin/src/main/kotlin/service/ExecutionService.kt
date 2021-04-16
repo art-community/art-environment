@@ -20,15 +20,21 @@ package service
 
 import logger.attention
 import logger.error
-import org.gradle.api.Project
+import org.gradle.process.internal.shutdown.ShutdownHooks.addShutdownHook
 import org.zeroturnaround.exec.ProcessExecutor
+import plugin.EnvironmentPlugin
 import plugin.plugin
 import java.io.ByteArrayOutputStream
+import java.io.OutputStream
 import java.nio.file.Path
+import java.util.concurrent.Executors.newSingleThreadScheduledExecutor
+import java.util.concurrent.TimeUnit.SECONDS
 
-fun Project.execute(vararg command: String) = execute(plugin.paths.runtimeDirectory, *command)
+private var executor = newSingleThreadScheduledExecutor()
 
-fun Project.execute(directory: Path, vararg command: String) {
+fun EnvironmentPlugin.execute(vararg command: String) = execute(plugin.paths.runtimeDirectory, *command)
+
+fun EnvironmentPlugin.execute(directory: Path, vararg command: String) {
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
     ProcessExecutor()
@@ -37,20 +43,19 @@ fun Project.execute(directory: Path, vararg command: String) {
             .redirectError(error)
             .command(*command)
             .execute()
-    output.toString().lineSequence().filter { line -> line.isNotBlank() }.forEach { line -> attention(line) }
-    error.toString().lineSequence().filter { line -> line.isNotBlank() }.forEach { line -> error(line) }
+    log(output, error)
 }
 
 
-fun Project.execute(name: String, script: () -> String) = execute(name, plugin.paths.runtimeDirectory, script)
+fun EnvironmentPlugin.execute(path: Path, script: () -> String) = execute(path, plugin.paths.runtimeDirectory, script)
 
-fun Project.execute(name: String, script: String) = execute(name, plugin.paths.runtimeDirectory, script)
+fun EnvironmentPlugin.execute(path: Path, script: String) = execute(path, plugin.paths.runtimeDirectory, script)
 
 
-fun Project.execute(name: String, directory: Path = plugin.paths.runtimeDirectory, script: () -> String) = execute(name, directory, script())
+fun EnvironmentPlugin.execute(path: Path, directory: Path = plugin.paths.runtimeDirectory, script: () -> String) = execute(path, directory, script())
 
-fun Project.execute(name: String, directory: Path = plugin.paths.runtimeDirectory, script: String) {
-    val path = writeScript(plugin.paths.scriptsDirectory.touch().resolve(name).bat(), script.trimIndent())
+fun EnvironmentPlugin.execute(path: Path, directory: Path = plugin.paths.runtimeDirectory, script: String) {
+    directory.touch().resolve(path).writeContent(script.trimIndent())
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
     ProcessExecutor()
@@ -58,7 +63,38 @@ fun Project.execute(name: String, directory: Path = plugin.paths.runtimeDirector
             .redirectOutput(output)
             .redirectError(error)
             .command(path.toAbsolutePath().toString())
-            .execute()
-    output.toString().lineSequence().filter { line -> line.isNotBlank() }.forEach { line -> attention(line) }
-    error.toString().lineSequence().filter { line -> line.isNotBlank() }.forEach { line -> kotlin.error(line) }
+            .start()
+    log(output, error)
+}
+
+
+fun EnvironmentPlugin.process(name: String, path: Path, directory: Path = plugin.paths.runtimeDirectory, script: () -> String) {
+    runCatching {
+        executor.shutdownNow()
+        executor = newSingleThreadScheduledExecutor()
+    }
+    directory.touch().resolve(path).writeContent(script().trimIndent())
+    val output = ByteArrayOutputStream()
+    val error = ByteArrayOutputStream()
+    executor.scheduleAtFixedRate({
+        val log = directory.resolve(name).log()
+
+        log.appendContent(output.toString())
+        output.reset()
+
+        log.appendContent(error.toString())
+        error.reset()
+    }, 0, 1L, SECONDS)
+    addShutdownHook { runCatching { executor.shutdownNow() } }
+    ProcessExecutor()
+            .directory(directory.touch().toFile())
+            .redirectOutputAlsoTo(output)
+            .redirectErrorAlsoTo(error)
+            .command(path.toAbsolutePath().toString())
+            .start()
+}
+
+private fun EnvironmentPlugin.log(output: OutputStream, error: OutputStream) {
+    output.toString().lineSequence().filter { line -> line.isNotBlank() }.forEach { line -> project.attention(line) }
+    error.toString().lineSequence().filter { line -> line.isNotBlank() }.forEach { line -> project.error(line) }
 }

@@ -22,7 +22,6 @@ import java.nio.file.Path
 
 data class PathsConfiguration(
         val runtimeDirectory: Path,
-        val scriptsDirectory: Path,
         val projectsDirectory: Path,
         val remoteRuntimeDirectory: String,
         val remoteScriptsDirectory: String)
