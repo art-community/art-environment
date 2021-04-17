@@ -59,7 +59,6 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
                     box.cfg {
                         listen = $port,
                         pid_file = "${name}.pid",
-                        log_level = 7
                         $configuration
                     }
                     $execution

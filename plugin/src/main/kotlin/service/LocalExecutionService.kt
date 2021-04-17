@@ -18,6 +18,7 @@
 
 package service
 
+import constants.EMPTY_STRING
 import constants.NEW_LINE
 import logger.attention
 import logger.error
@@ -32,42 +33,36 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 
 private val processLogsWriters = mutableMapOf<String, Future<*>>()
 
+
 fun EnvironmentPlugin.execute(vararg command: String) = execute(plugin.paths.runtimeDirectory, *command)
 
 fun EnvironmentPlugin.execute(directory: Path, vararg command: String) {
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
     val processResult = ProcessExecutor()
-            .directory(directory.touch().toFile())
+            .directory(directory.touchDirectory().toFile())
             .redirectOutput(output)
             .redirectError(error)
             .command(*command)
             .execute()
     project.run {
-        attention("Command executed")
+        attention("Command executed: ${command.joinToString(" ")}")
         attention("Directory: $directory")
         attention("Exit code: ${processResult.exitValue}")
-        attention("Output: ${processResult.outputString()}")
-        attention("Command ${command.joinToString(" ")}")
     }
     logExecution(output, error)
 }
 
 
-fun EnvironmentPlugin.execute(path: Path, script: () -> String) = execute(path, plugin.paths.runtimeDirectory, script)
-
-fun EnvironmentPlugin.execute(path: Path, script: String) = execute(path, plugin.paths.runtimeDirectory, script)
-
-
 fun EnvironmentPlugin.execute(path: Path, directory: Path = plugin.paths.runtimeDirectory, script: () -> String) = execute(path, directory, script())
 
 fun EnvironmentPlugin.execute(path: Path, directory: Path = plugin.paths.runtimeDirectory, script: String) {
-    directory.touch().resolve(path).writeContent(script.trimIndent())
+    directory.touchDirectory().resolve(path).writeContent(script.trimIndent())
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
     val scriptPath = path.toAbsolutePath()
     val processResult = ProcessExecutor()
-            .directory(directory.touch().toFile())
+            .directory(directory.touchDirectory().toFile())
             .redirectOutput(output)
             .redirectError(error)
             .command(scriptPath.toString())
@@ -76,8 +71,7 @@ fun EnvironmentPlugin.execute(path: Path, directory: Path = plugin.paths.runtime
         attention("Script executed")
         attention("Directory: $directory")
         attention("Exit code: ${processResult.exitValue}")
-        attention("Output: ${processResult.outputString()}")
-        attention("Script $scriptPath", name)
+        attention("Script: $scriptPath", name)
     }
     logExecution(output, error)
 }
@@ -88,8 +82,8 @@ fun EnvironmentPlugin.process(name: String, path: Path, directory: Path = plugin
 fun EnvironmentPlugin.process(name: String, path: Path, directory: Path = plugin.paths.runtimeDirectory, script: String) {
     runCatching {
         processLogsWriters.remove(name)?.cancel(true)
-        directory.resolve(name).stdout().toFile().delete()
-        directory.resolve(name).stderr().toFile().delete()
+        directory.resolve(name).stdout().toFile().writeText(EMPTY_STRING)
+        directory.resolve(name).stderr().toFile().writeText(EMPTY_STRING)
     }
     directory.resolve(path).writeContent(script.trimIndent())
     val output = ByteArrayOutputStream()
@@ -114,6 +108,7 @@ fun EnvironmentPlugin.process(name: String, path: Path, directory: Path = plugin
         attention("Error - ${directory.resolve(name).stderr()}", name)
     }
 }
+
 
 private fun String.logProcess(log: Path, output: ByteArrayOutputStream, error: ByteArrayOutputStream) {
     output.apply {

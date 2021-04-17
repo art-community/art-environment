@@ -22,7 +22,7 @@ import constants.*
 import java.nio.charset.Charset
 import java.nio.file.Path
 
-fun Path.touch(): Path {
+fun Path.touchDirectory(): Path {
     if (toFile().exists()) return this
     if (!toFile().mkdirs()) {
         throw fileCreationException(parent)

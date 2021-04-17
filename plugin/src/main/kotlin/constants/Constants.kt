@@ -59,6 +59,7 @@ enum class ExecutionMode {
 const val ART = "art"
 const val CONFIGURE = "configure"
 const val BOOTSTRAP_TARANTOOL = "bootstrap-tarantool"
+const val KILL_TARANTOOL = "kill-tarantool"
 const val JAVA = "java"
 const val KOTLIN = "kotlin"
 const val TARANTOOL = "tarantool"

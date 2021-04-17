@@ -21,35 +21,3 @@ package service
 import logger.attention
 import plugin.EnvironmentPlugin
 import java.nio.file.Path
-
-fun EnvironmentPlugin.restartWslProcess(processName: String, directory: Path, processScript: () -> String) = buildString {
-    directory.resolve(processName).pid().toFile().apply {
-        takeIf { file -> file.exists() }
-                ?.readText()
-                ?.takeIf { string -> string.isNotBlank() }
-                ?.toInt()
-                ?.let { pid ->
-                    appendLine("""wsl -e kill -- -9 $pid""")
-                    project.attention("WSL: killed process $pid", processName)
-                }
-        delete()
-        createNewFile()
-    }
-    appendLine(processScript())
-}
-
-fun EnvironmentPlugin.restartLinuxProcess(processName: String, directory: Path, processScript: () -> String) = buildString {
-    directory.resolve(processName).pid().toFile().apply {
-        takeIf { file -> file.exists() }
-                ?.readText()
-                ?.takeIf { string -> string.isNotBlank() }
-                ?.toInt()
-                ?.let { pid ->
-                    appendLine("""kill -9 $pid""")
-                    project.attention("Killed process $pid", processName)
-                }
-        delete()
-        createNewFile()
-    }
-    appendLine(processScript())
-}
