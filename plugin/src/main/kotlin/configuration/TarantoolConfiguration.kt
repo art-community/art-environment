@@ -36,7 +36,7 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
     open class InstanceConfiguration(val name: String) {
         var port: Int = DEFAULT_TARANTOOL_PORT
             private set
-        var configuration: String = EMPTY_STRING
+        var configuration: MutableMap<String, String> = mutableMapOf()
             private set
         var execution: String = EMPTY_STRING
             private set
@@ -47,8 +47,8 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
             this.port = port
         }
 
-        fun configure(script: () -> String) {
-            this.configuration = script()
+        fun configure(name: String, value: String) {
+            this.configuration[name] = value
         }
 
         fun execute(script: () -> String) {
@@ -71,7 +71,7 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
 box.cfg {
     listen = $port,
     pid_file = "${name}.pid",
-    ${configuration.trimIndent()}
+    ${configuration.entries.joinToString { entry -> "${entry.key} = ${entry.value}," }}
 }
 box.schema.user.create('$DEFAULT_USERNAME', {password = '$DEFAULT_PASSWORD', if_not_exists = true})
 box.schema.user.grant('$DEFAULT_USERNAME', 'read,write,execute,create,alter,drop', 'universe', nil, {if_not_exists=true})

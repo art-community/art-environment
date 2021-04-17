@@ -19,6 +19,7 @@
 package service
 
 import constants.EMPTY_STRING
+import constants.LOG_FILE_REFRESH_PERIOD
 import constants.NEW_LINE
 import logger.attention
 import logger.error
@@ -91,7 +92,7 @@ fun EnvironmentPlugin.process(name: String, path: Path, directory: Path = plugin
     processLogsWriters[name] = localLogsScheduler.scheduleAtFixedRate(
             { name.logProcess(directory.resolve(name), output, error) },
             0,
-            500L,
+            LOG_FILE_REFRESH_PERIOD,
             MILLISECONDS
     )
     val scriptPath = path.toAbsolutePath().toString()
