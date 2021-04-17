@@ -143,3 +143,6 @@ val PROJECT_NAMES = mapOf(
 )
 
 const val DEFAULT_TARANTOOL_PORT = 3301
+
+const val DEFAULT_USERNAME = "username"
+const val DEFAULT_PASSWORD = "password"

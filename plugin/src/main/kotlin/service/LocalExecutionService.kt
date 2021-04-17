@@ -102,7 +102,7 @@ fun EnvironmentPlugin.process(name: String, path: Path, directory: Path = plugin
             .command(scriptPath)
             .start()
     project.run {
-        attention("Process started", name)
+        attention("New process started", name)
         attention("Script - $scriptPath", name)
         attention("Output - ${directory.resolve(name).stdout()}", name)
         attention("Error - ${directory.resolve(name).stderr()}", name)

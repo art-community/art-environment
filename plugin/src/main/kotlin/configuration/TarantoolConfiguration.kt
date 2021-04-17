@@ -18,9 +18,7 @@
 
 package configuration
 
-import constants.DEFAULT_TARANTOOL_PORT
-import constants.EMPTY_STRING
-import constants.TARANTOOL
+import constants.*
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
@@ -61,7 +59,7 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
             this.execution = script
         }
 
-        fun executeFile(script: String) {
+        fun script(script: String) {
             this.execution = plugin.project.projectDir.resolve(script).readText()
         }
 
@@ -75,6 +73,8 @@ box.cfg {
     pid_file = "${name}.pid",
     ${configuration.trimIndent()}
 }
+box.schema.user.create('$DEFAULT_USERNAME', {password = '$DEFAULT_PASSWORD', if_not_exists = true})
+box.schema.user.grant('$DEFAULT_USERNAME', 'read,write,execute,create,alter,drop', 'universe', nil, {if_not_exists=true})
 ${execution.trimIndent()}
 
 """.trimIndent()

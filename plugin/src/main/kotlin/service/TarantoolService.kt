@@ -80,16 +80,15 @@ private fun EnvironmentPlugin.stopOnWsl(configuration: TarantoolConfiguration, n
 
 private fun EnvironmentPlugin.copyTarantoolModule(directory: Path, instance: InstanceConfiguration) {
     project.run {
-        val moduleScript = directory
-                .resolve(PROJECT_NAMES[TARANTOOL]!!)
+        directory.resolve(PROJECT_NAMES[TARANTOOL]!!)
                 .lua()
                 .toFile()
-                .apply { delete() }
+                .delete()
         if (!instance.includeModule) {
             return
         }
         copy {
-            moduleScript.resolve(PROJECTS)
+            projectDir.resolve(PROJECTS)
                     .resolve(PROJECT_NAMES[TARANTOOL]!!)
                     .resolve(BUILD)
                     .resolve(DESTINATION)
