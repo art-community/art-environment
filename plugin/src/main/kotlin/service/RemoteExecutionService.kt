@@ -19,11 +19,17 @@
 package service
 
 import configuration.RemoteExecutionConfiguration
+import logger.error
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
+import net.schmizz.sshj.sftp.FileAttributes
 import net.schmizz.sshj.sftp.OpenMode.*
 import net.schmizz.sshj.sftp.SFTPClient
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier
+import net.schmizz.sshj.xfer.FilePermission.GRP_RWX
+import net.schmizz.sshj.xfer.FilePermission.USR_RWX
+import plugin.plugin
+import java.io.InputStream
 import java.nio.file.Files.createDirectories
 import java.nio.file.Path
 import java.time.Duration
@@ -42,8 +48,24 @@ fun <T> RemoteExecutionConfiguration.ssh(executor: SSHClient.() -> T): T {
     }
 }
 
+fun <T> SSHClient.sftp(executor: SFTPClient.() -> T): T = newSFTPClient().use { client ->
+    executor(client)
+}
+
+
 fun SSHClient.session(executor: Session.() -> Unit) = startSession().use { session ->
     executor(session)
+}
+
+fun SSHClient.execute(command: String) = session {
+    val exec = exec(command)
+}
+
+fun SSHClient.execute(remotePath: String, script: () -> String) {
+    writeFile(remotePath, script())
+    execute("""
+        bash -c "cd /home/anton/art && nohup bash $remotePath 1>log.stdout 2>log.stderr &"
+    """.trimIndent())
 }
 
 
@@ -52,17 +74,24 @@ fun SSHClient.upload(localPath: Path, remotePath: String) = sftp { put(localPath
 fun SSHClient.download(remotePath: String, localPath: Path) = sftp { get(remotePath, createDirectories(localPath).toString()) }
 
 
-fun SSHClient.readFile(remotePath: String): ByteArray = sftp { open(remotePath, setOf(READ)).RemoteFileInputStream().readBytes() }
+fun SSHClient.readFileBytes(remotePath: String): ByteArray = sftp { open(remotePath, setOf(READ)).RemoteFileInputStream().readBytes() }
 
 fun SSHClient.readFileText(remotePath: String): String = sftp { open(remotePath, setOf(READ)).RemoteFileInputStream().reader().readText() }
 
-fun SSHClient.readFileLines(remotePath: String): List<String> = sftp { open(remotePath, setOf(READ)).RemoteFileInputStream().reader().readLines() }
 
+fun SSHClient.writeFile(remotePath: String, content: ByteArray): Unit = sftp {
+    open(remotePath, setOf(CREAT, WRITE, TRUNC), FileAttributes.Builder().withPermissions(setOf(USR_RWX, GRP_RWX)).build()).use { file ->
+        file.RemoteFileOutputStream().use { stream ->
+            stream.write(content)
+        }
+    }
+}
 
-fun SSHClient.writeFile(remotePath: String, content: ByteArray): Unit = sftp { open(remotePath, setOf(CREAT, WRITE, TRUNC)).RemoteFileOutputStream().write(content) }
+fun SSHClient.writeFile(remotePath: String, content: String): Unit = writeFile(remotePath, content.toByteArray())
 
-fun SSHClient.writeFile(remotePath: String, content: String): Unit = sftp { open(remotePath, setOf(CREAT, WRITE, TRUNC)).RemoteFileOutputStream().writer().write(content) }
-
-fun <T> SSHClient.sftp(executor: SFTPClient.() -> T): T = newSFTPClient().use { client ->
-    executor(client)
+private fun logExecution(output: InputStream) {
+    output.reader()
+            .readLines()
+            .filter { line -> line.isNotBlank() }
+            .forEach { line -> plugin.project.error(line) }
 }
