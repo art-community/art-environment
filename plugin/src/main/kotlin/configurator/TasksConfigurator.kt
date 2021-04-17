@@ -18,10 +18,7 @@
 
 package configurator
 
-import constants.ART
-import constants.TARANTOOL_RESTART
-import constants.CONFIGURE
-import constants.TARANTOOL_STOP
+import constants.*
 import org.gradle.api.Project
 import plugin.plugin
 import service.restartTarantool
@@ -43,15 +40,15 @@ fun Project.configureTasks() {
         group = ART
         onlyIf { plugin.extension.tarantoolConfiguration.instances.isNotEmpty() }
         doLast {
-            plugin.run { restartTarantool() }
+            plugin.run {
+                restartTarantool()
+            }
         }
     }
 
     tasks.register(TARANTOOL_STOP) {
         group = ART
         onlyIf { plugin.extension.tarantoolConfiguration.instances.isNotEmpty() }
-        doLast {
-            plugin.run { stopTarantool() }
-        }
+        doLast { plugin.run { stopTarantool() } }
     }
 }

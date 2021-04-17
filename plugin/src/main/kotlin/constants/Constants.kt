@@ -69,6 +69,9 @@ const val GRADLE = "gradle"
 const val GRADLE_PLUGIN = "gradle-plugin"
 const val MAIN = "main"
 const val PROJECTS = "projects"
+const val BUILD = "build"
+const val CLEAN = "clean"
+const val DESTINATION = "destination"
 
 const val DEFAULT_URL = "https://github.com/art-community"
 

@@ -42,6 +42,8 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
             private set
         var execution: String = EMPTY_STRING
             private set
+        var includeModule: Boolean = true
+            private set
 
         fun port(port: Int) {
             this.port = port
@@ -63,15 +65,19 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
             this.execution = plugin.project.projectDir.resolve(script).readText()
         }
 
-        fun toLua() =
-                """
-                    box.cfg {
-                        listen = $port,
-                        pid_file = "${name}.pid",
-                        $configuration
-                    }
-                    $execution
-                """.trimIndent()
+        fun excludeModule() {
+            includeModule = false
+        }
+
+        fun toLua() = """
+box.cfg {
+    listen = $port,
+    pid_file = "${name}.pid",
+    ${configuration.trimIndent()}
+}
+${execution.trimIndent()}
+
+""".trimIndent()
 
     }
 }
