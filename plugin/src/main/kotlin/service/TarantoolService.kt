@@ -23,6 +23,7 @@ import configuration.TarantoolConfiguration.InstanceConfiguration
 import constants.ExecutionMode.*
 import constants.SCRIPTS
 import constants.TARANTOOL
+import logger.attention
 import plugin.EnvironmentPlugin
 
 fun EnvironmentPlugin.bootstrapTarantool() = extension.tarantoolConfiguration.run {
@@ -42,6 +43,12 @@ private fun EnvironmentPlugin.bootstrapLinux(configuration: TarantoolConfigurati
             ?.touch()
             ?: paths.runtimeDirectory.resolve(TARANTOOL).resolve(name).touch()
     val scriptPath = directory.resolve(SCRIPTS).touch().resolve(instance.name)
+    project.run {
+        attention("Bootstrapping", name)
+        attention("Directory: $directory", name)
+        attention("Executable: $executable", name)
+        attention("Initialization script: ${instance.toLua()}", name)
+    }
     process(instance.name, scriptPath.sh(), directory) {
         restartLinuxProcess(instance.name, directory) {
             """
@@ -58,6 +65,12 @@ private fun EnvironmentPlugin.bootstrapWsl(configuration: TarantoolConfiguration
             ?.touch()
             ?: paths.runtimeDirectory.resolve(TARANTOOL).resolve(name).touch()
     val scriptPath = directory.resolve(SCRIPTS).touch().resolve(instance.name)
+    project.run {
+        attention("Bootstrapping", name)
+        attention("Directory: $directory", name)
+        attention("Executable: $executable", name)
+        attention("Initialization script: ${instance.toLua()}", name)
+    }
     process(instance.name, scriptPath.bat(), directory) {
         restartWslProcess(instance.name, directory) {
             """

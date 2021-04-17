@@ -37,19 +37,21 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
     open class InstanceConfiguration(val name: String) {
         var port: Int = DEFAULT_TARANTOOL_PORT
             private set
-        var lua: String = EMPTY_STRING
+        var configuration: String = EMPTY_STRING
+            private set
+        var execution: String = EMPTY_STRING
             private set
 
         fun port(port: Int) {
             this.port = port
         }
 
-        fun lua(script: () -> String) {
-            this.lua = script()
+        fun configure(script: () -> String) {
+            this.configuration = script()
         }
 
-        fun lua(script: String) {
-            this.lua = script
+        fun execute(script: () -> String) {
+            this.execution = script()
         }
 
         fun toLua() =
@@ -58,7 +60,9 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
                         listen = $port,
                         pid_file = "${name}.pid",
                         log_level = 7
+                        $configuration
                     }
+                    $execution
                 """.trimIndent()
 
     }
