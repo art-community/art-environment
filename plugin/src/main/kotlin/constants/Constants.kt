@@ -50,7 +50,7 @@ val REMOTE_RUNTIME_DIRECTORY = { project: String -> "~/art/$project/runtime" }
 val REMOTE_SCRIPTS_DIRECTORY = { project: String -> "~/art/$project/scripts" }
 
 enum class ExecutionMode {
-    NATIVE,
+    LINUX,
     WSL,
     REMOTE
 }

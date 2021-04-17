@@ -18,53 +18,51 @@
 
 package service
 
+import configuration.TarantoolConfiguration
+import configuration.TarantoolConfiguration.InstanceConfiguration
 import constants.ExecutionMode.*
 import constants.SCRIPTS
 import constants.TARANTOOL
 import plugin.EnvironmentPlugin
 
 fun EnvironmentPlugin.bootstrapTarantool() = extension.tarantoolConfiguration.run {
-    instances.asMap.forEach { (name, configuration) ->
+    instances.asMap.forEach { (name, instance) ->
         when (executionMode) {
-            NATIVE -> {
-                val executable = localExecutionConfiguration.executable ?: TARANTOOL
-                val directory = localExecutionConfiguration.directory
-                        ?.resolve(name)
-                        ?.touch()
-                        ?: paths.runtimeDirectory.resolve(TARANTOOL).resolve(name).touch()
-                val script = directory.resolve(SCRIPTS).touch().resolve(configuration.name).lua().writeContent(configuration.lua)
-                execute(directory, executable, script.toAbsolutePath().toString())
-            }
-            WSL -> {
-                val executable = localExecutionConfiguration.executable ?: TARANTOOL
-                val directory = localExecutionConfiguration.directory?.resolve(name)?.touch()
-                        ?: paths.runtimeDirectory.resolve(TARANTOOL).resolve(name).touch()
-                val scriptName = directory.resolve(SCRIPTS).touch().resolve(configuration.name)
-                val scriptContent = """
-                    box.cfg {
-                        listen = ${configuration.port},
-                        pid_file = "${name}.pid",
-                        log_level = 7
-                    }
-                """.trimIndent()
-                process(configuration.name, scriptName.bat(), directory) {
-                    buildString {
-                        val pidFile = directory.resolve(configuration.name).pid()
-                                .toFile()
-                                .takeIf { file -> file.exists() }
-                        val pid = pidFile
-                                ?.readText()
-                                ?.takeIf { string -> string.isNotBlank() }
-                                ?.toInt()
-                        pid?.apply { appendLine("""wsl -e kill -- -9 $this""") }
-                        val file = directory.resolve(configuration.name).pid().toFile()
-                        file.delete()
-                        file.createNewFile()
-                        appendLine("""wsl -e $executable -- ${scriptName.lua().writeContent(scriptContent).toWsl()} """)
-                    }
-                }
-            }
+            LINUX -> bootstrapLinux(this, name, instance)
+            WSL -> bootstrapWsl(this, name, instance)
             REMOTE -> TODO()
+        }
+    }
+}
+
+private fun EnvironmentPlugin.bootstrapLinux(configuration: TarantoolConfiguration, name: String, instance: InstanceConfiguration) {
+    val executable = configuration.localExecutionConfiguration.executable ?: TARANTOOL
+    val directory = configuration.localExecutionConfiguration.directory
+            ?.resolve(name)
+            ?.touch()
+            ?: paths.runtimeDirectory.resolve(TARANTOOL).resolve(name).touch()
+    val scriptPath = directory.resolve(SCRIPTS).touch().resolve(instance.name)
+    process(instance.name, scriptPath.sh(), directory) {
+        restartLinuxProcess(instance.name, directory) {
+            """
+                $executable ${scriptPath.lua().writeContent(instance.toLua())} 
+            """.trimIndent()
+        }
+    }
+}
+
+private fun EnvironmentPlugin.bootstrapWsl(configuration: TarantoolConfiguration, name: String, instance: InstanceConfiguration) {
+    val executable = configuration.localExecutionConfiguration.executable ?: TARANTOOL
+    val directory = configuration.localExecutionConfiguration.directory
+            ?.resolve(name)
+            ?.touch()
+            ?: paths.runtimeDirectory.resolve(TARANTOOL).resolve(name).touch()
+    val scriptPath = directory.resolve(SCRIPTS).touch().resolve(instance.name)
+    process(instance.name, scriptPath.bat(), directory) {
+        restartWslProcess(instance.name, directory) {
+            """
+                wsl -e $executable -- ${scriptPath.lua().writeContent(instance.toLua()).toWsl()} 
+            """.trimIndent()
         }
     }
 }

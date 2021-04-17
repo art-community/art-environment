@@ -51,5 +51,15 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
         fun lua(script: String) {
             this.lua = script
         }
+
+        fun toLua() =
+                """
+                    box.cfg {
+                        listen = $port,
+                        pid_file = "${name}.pid",
+                        log_level = 7
+                    }
+                """.trimIndent()
+
     }
 }

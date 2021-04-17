@@ -49,7 +49,7 @@ open class ExecutableConfigurationImplementation @Inject constructor(objectFacto
     override fun native(configurator: Action<in LocalExecutionConfiguration>) {
         if (isWindows) throw nativeNotAvailableException("Tarantool is not supported on Windows. ")
         configurator.execute(localExecutionConfiguration)
-        executionMode = NATIVE
+        executionMode = LINUX
     }
 
     override fun remote(configurator: Action<in RemoteExecutionConfiguration>) {

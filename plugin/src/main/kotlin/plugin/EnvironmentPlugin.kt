@@ -25,6 +25,9 @@ import extension.ArtExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
+import org.gradle.process.internal.shutdown.ShutdownHooks.addShutdownHook
+import java.util.concurrent.Executors.newSingleThreadScheduledExecutor
+import java.util.concurrent.ScheduledExecutorService
 
 lateinit var plugin: EnvironmentPlugin
     private set
@@ -36,6 +39,7 @@ class EnvironmentPlugin : Plugin<Project> {
         private set
     lateinit var extension: ArtExtension
         private set
+    val localLogsScheduler: ScheduledExecutorService = newSingleThreadScheduledExecutor()
 
     override fun apply(project: Project): Unit = project.run {
         this@EnvironmentPlugin.project = this
@@ -47,6 +51,7 @@ class EnvironmentPlugin : Plugin<Project> {
                 remoteRuntimeDirectory = REMOTE_RUNTIME_DIRECTORY(project.name),
                 remoteScriptsDirectory = REMOTE_SCRIPTS_DIRECTORY(project.name)
         )
+        addShutdownHook { localLogsScheduler.shutdownNow() }
         configureTasks()
     }
 }

@@ -31,38 +31,32 @@ fun Path.touch(): Path {
 }
 
 fun Path.writeContent(content: String): Path {
-    if (parent.toFile().exists()) {
+    val asFile = parent.toFile()
+    if (asFile.exists()) {
+        if (!asFile.exists()) asFile.createNewFile()
         toFile().writeText(content, charset = Charset.defaultCharset())
         return this
     }
-    if (!parent.toFile().mkdirs()) {
+    if (!asFile.mkdirs()) {
         throw fileCreationException(parent)
     }
-    toFile().writeText(content, charset = Charset.defaultCharset())
+    if (!asFile.exists()) asFile.createNewFile()
+    asFile.writeText(content, charset = Charset.defaultCharset())
     return this
 }
 
 fun Path.appendContent(content: String): Path {
+    val asFile = toFile()
     if (parent.toFile().exists()) {
-        toFile().appendText(content, charset = Charset.defaultCharset())
+        if (!asFile.exists()) asFile.createNewFile()
+        asFile.appendText(content, charset = Charset.defaultCharset())
         return this
     }
     if (!parent.toFile().mkdirs()) {
         throw fileCreationException(parent)
     }
-    toFile().appendText(content, charset = Charset.defaultCharset())
-    return this
-}
-
-fun Path.writeContent(content: ByteArray): Path {
-    if (parent.toFile().exists()) {
-        toFile().writeBytes(content)
-        return this
-    }
-    if (!parent.toFile().mkdirs()) {
-        throw fileCreationException(parent)
-    }
-    toFile().writeBytes(content)
+    if (!asFile.exists()) asFile.createNewFile()
+    asFile.appendText(content, charset = Charset.defaultCharset())
     return this
 }
 
