@@ -46,9 +46,9 @@ fun EnvironmentPlugin.execute(directory: Path, vararg command: String) {
             .command(*command)
             .execute()
     project.run {
-        attention("Command executed: ${command.joinToString(" ")}")
-        attention("Directory: $directory")
-        attention("Exit code: ${processResult.exitValue}")
+        attention("Command executed - ${command.joinToString(" ")}")
+        attention("Directory - $directory")
+        attention("Exit code - ${processResult.exitValue}")
     }
     logExecution(output, error)
 }
@@ -69,9 +69,9 @@ fun EnvironmentPlugin.execute(path: Path, directory: Path = plugin.paths.runtime
             .execute()
     project.run {
         attention("Script executed")
-        attention("Directory: $directory")
-        attention("Exit code: ${processResult.exitValue}")
-        attention("Script: $scriptPath", name)
+        attention("Directory - $directory")
+        attention("Exit code - ${processResult.exitValue}")
+        attention("Script - $scriptPath", name)
     }
     logExecution(output, error)
 }
@@ -103,7 +103,7 @@ fun EnvironmentPlugin.process(name: String, path: Path, directory: Path = plugin
             .start()
     project.run {
         attention("Process started", name)
-        attention("Script $scriptPath", name)
+        attention("Script - $scriptPath", name)
         attention("Output - ${directory.resolve(name).stdout()}", name)
         attention("Error - ${directory.resolve(name).stderr()}", name)
     }

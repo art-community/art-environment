@@ -24,6 +24,7 @@ import constants.TARANTOOL
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
+import plugin.plugin
 import javax.inject.Inject
 
 open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFactory, executableConfiguration: ExecutableConfiguration)
@@ -52,6 +53,14 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
 
         fun execute(script: () -> String) {
             this.execution = script()
+        }
+
+        fun execute(script: String) {
+            this.execution = script
+        }
+
+        fun executeFile(script: String) {
+            this.execution = plugin.project.projectDir.resolve(script).readText()
         }
 
         fun toLua() =

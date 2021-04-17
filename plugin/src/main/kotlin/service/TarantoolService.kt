@@ -27,54 +27,56 @@ import logger.attention
 import plugin.EnvironmentPlugin
 import java.nio.file.Path
 
-fun EnvironmentPlugin.bootstrapTarantool() = extension.tarantoolConfiguration.run {
+fun EnvironmentPlugin.restartTarantool() = extension.tarantoolConfiguration.run {
     instances.asMap.values.forEach { instance ->
         when (executionMode) {
-            LINUX -> bootstrapLinux(this, instance)
-            WSL -> bootstrapWsl(this, instance)
+            LINUX -> restartOnLinux(this, instance)
+            WSL -> restartOnWsl(this, instance)
             REMOTE -> TODO()
         }
+        println()
     }
 }
 
-fun EnvironmentPlugin.killTarantool() = extension.tarantoolConfiguration.run {
+fun EnvironmentPlugin.stopTarantool() = extension.tarantoolConfiguration.run {
     instances.asMap.keys.forEach { name ->
         when (executionMode) {
-            LINUX -> killLinux(this, name)
-            WSL -> killWsl(this, name)
+            LINUX -> stopOnLinux(this, name)
+            WSL -> stopOnWsl(this, name)
             REMOTE -> TODO()
         }
+        println()
     }
 }
 
 
-private fun EnvironmentPlugin.bootstrapLinux(configuration: TarantoolConfiguration, instance: InstanceConfiguration) {
+private fun EnvironmentPlugin.restartOnLinux(configuration: TarantoolConfiguration, instance: InstanceConfiguration) {
     val executable = configuration.localExecutionConfiguration.executable ?: TARANTOOL
     val directory = computeDirectory(configuration, instance.name)
     val scriptPath = directory.resolve(SCRIPTS).touchDirectory().resolve(instance.name)
-    bootstrapLog(instance, directory, executable)
+    restartingLog(instance, directory, executable)
     restartLinuxProcess(instance.name, directory) { "$executable ${scriptPath.lua().writeContent(instance.toLua())}" }
 }
 
-private fun EnvironmentPlugin.killLinux(configuration: TarantoolConfiguration, name: String) = stopLinuxProcess(name, computeDirectory(configuration, name))
+private fun EnvironmentPlugin.stopOnLinux(configuration: TarantoolConfiguration, name: String) = stopLinuxProcess(name, computeDirectory(configuration, name))
 
 
-private fun EnvironmentPlugin.bootstrapWsl(configuration: TarantoolConfiguration, instance: InstanceConfiguration) {
+private fun EnvironmentPlugin.restartOnWsl(configuration: TarantoolConfiguration, instance: InstanceConfiguration) {
     val executable = configuration.localExecutionConfiguration.executable ?: TARANTOOL
     val directory = computeDirectory(configuration, instance.name)
     val scriptPath = directory.resolve(SCRIPTS).touchDirectory().resolve(instance.name)
-    bootstrapLog(instance, directory, executable)
+    restartingLog(instance, directory, executable)
     restartWslProcess(instance.name, directory) { "wsl -e $executable -- ${scriptPath.lua().writeContent(instance.toLua()).toWsl()}" }
 }
 
-private fun EnvironmentPlugin.killWsl(configuration: TarantoolConfiguration, name: String) = stopWslProcess(name, computeDirectory(configuration, name))
+private fun EnvironmentPlugin.stopOnWsl(configuration: TarantoolConfiguration, name: String) = stopWslProcess(name, computeDirectory(configuration, name))
 
 
-private fun EnvironmentPlugin.bootstrapLog(instance: InstanceConfiguration, directory: Path, executable: String) = project.run {
-    attention("Tarantool bootstrap", instance.name)
-    attention("Directory: $directory", instance.name)
-    attention("Executable: $executable", instance.name)
-    attention("Script: ${instance.toLua()}", instance.name)
+private fun EnvironmentPlugin.restartingLog(instance: InstanceConfiguration, directory: Path, executable: String) = project.run {
+    attention("Tarantool restarting", instance.name)
+    attention("Directory - $directory", instance.name)
+    attention("Executable - $executable", instance.name)
+    attention("Script - \n${instance.toLua()}", instance.name)
 }
 
 private fun EnvironmentPlugin.computeDirectory(configuration: TarantoolConfiguration, name: String): Path {

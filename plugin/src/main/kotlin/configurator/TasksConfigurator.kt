@@ -19,13 +19,13 @@
 package configurator
 
 import constants.ART
-import constants.BOOTSTRAP_TARANTOOL
+import constants.TARANTOOL_RESTART
 import constants.CONFIGURE
-import constants.KILL_TARANTOOL
+import constants.TARANTOOL_STOP
 import org.gradle.api.Project
 import plugin.plugin
-import service.bootstrapTarantool
-import service.killTarantool
+import service.restartTarantool
+import service.stopTarantool
 
 fun Project.configureTasks() {
     tasks.register(CONFIGURE) {
@@ -39,19 +39,19 @@ fun Project.configureTasks() {
         }
     }
 
-    tasks.register(BOOTSTRAP_TARANTOOL) {
+    tasks.register(TARANTOOL_RESTART) {
         group = ART
         onlyIf { plugin.extension.tarantoolConfiguration.instances.isNotEmpty() }
         doLast {
-            plugin.run { bootstrapTarantool() }
+            plugin.run { restartTarantool() }
         }
     }
 
-    tasks.register(KILL_TARANTOOL) {
+    tasks.register(TARANTOOL_STOP) {
         group = ART
         onlyIf { plugin.extension.tarantoolConfiguration.instances.isNotEmpty() }
         doLast {
-            plugin.run { killTarantool() }
+            plugin.run { stopTarantool() }
         }
     }
 }
