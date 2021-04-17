@@ -53,7 +53,6 @@ fun EnvironmentPlugin.restartLinuxProcess(name: String, directory: Path, script:
                         project.attention("Linux: killed process $pid", name)
                     }
             delete()
-            createNewFile()
         }
         appendLine(script())
     }
