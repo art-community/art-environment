@@ -18,7 +18,9 @@
 
 package logger
 
+import constants.EMPTY_STRING
 import constants.LOG_TEMPLATE
+import constants.NEW_LINE
 import logger.LogMessageColor.*
 import org.gradle.api.Project
 
@@ -62,6 +64,9 @@ fun Project.warning(message: String, context: String = project.name, color: LogM
 
 fun Project.attention(message: String, context: String = project.name, color: LogMessageColor = CYAN_BOLD) {
     logger.quiet("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")
+}
+fun Project.line() {
+    logger.quiet(EMPTY_STRING)
 }
 
 fun Project.additional(message: String, context: String = project.name, color: LogMessageColor = PURPLE_BOLD) {

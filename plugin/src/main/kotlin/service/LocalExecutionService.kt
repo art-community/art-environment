@@ -20,6 +20,7 @@ package service
 
 import constants.LOG_FILE_REFRESH_PERIOD
 import logger.attention
+import logger.line
 import org.zeroturnaround.exec.ProcessExecutor
 import plugin.EnvironmentPlugin
 import plugin.plugin
@@ -32,9 +33,9 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 private val processLogsWriters = mutableMapOf<String, Future<*>>()
 private val processLogsExecutor = plugin.register(newSingleThreadScheduledExecutor())
 
-fun EnvironmentPlugin.execute(vararg command: String) = execute(runtimeDirectory, *command)
+fun EnvironmentPlugin.execute(context: String = project.name, vararg command: String) = execute(context, runtimeDirectory, *command)
 
-fun EnvironmentPlugin.execute(directory: Path, vararg command: String) {
+fun EnvironmentPlugin.execute(context: String = project.name, directory: Path, vararg command: String) {
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
     val processResult = ProcessExecutor()
@@ -44,11 +45,11 @@ fun EnvironmentPlugin.execute(directory: Path, vararg command: String) {
             .command(*command)
             .execute()
     project.run {
-        attention("Command executed - ${command.joinToString(" ")}")
-        attention("Directory - $directory")
-        attention("Exit value - ${processResult.exitValue}")
+        attention("""Command executed - "${command.joinToString(" ")}" """, context)
+        attention("Directory - $directory", context)
+        attention("Exit value - ${processResult.exitValue}", context)
     }
-    consoleLog(output, error)
+    consoleLog(output, error, context)
 }
 
 
@@ -85,6 +86,7 @@ private fun EnvironmentPlugin.process(name: String, scriptPath: Path, directory:
         attention("Script - $scriptPath", name)
         attention("Output - ${processDirectory.stdout()}", name)
         attention("Error - ${processDirectory.stderr()}", name)
+        line()
     }
 }
 

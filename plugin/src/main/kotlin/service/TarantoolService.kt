@@ -96,7 +96,7 @@ private fun EnvironmentPlugin.restartingLog(instance: InstanceConfiguration, dir
     attention("Tarantool restarting", instance.name)
     attention("Directory - $directory", instance.name)
     attention("Executable - $executable", instance.name)
-    attention("Script - \n${instance.toLua()}", instance.name)
+    attention("Script - \n${instance.toLua().trimIndent()}", instance.name)
 }
 
 private fun TarantoolConfiguration.computeDirectory(name: String): Path = executionConfiguration.directory()

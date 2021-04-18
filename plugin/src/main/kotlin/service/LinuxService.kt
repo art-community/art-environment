@@ -32,8 +32,8 @@ fun EnvironmentPlugin.stopLinuxProcess(name: String, directory: Path) {
                 readText().takeIf { pid -> pid.isNotBlank() }
                         ?.toInt()
                         ?.let { pid ->
-                            execute("kill", "-9", pid.toString())
-                            project.attention("Linux: killed process $pid", name)
+                            execute(name, "kill", "-9", pid.toString())
+                            project.attention("Linux process killed $pid", name)
                         }
                 delete()
             }

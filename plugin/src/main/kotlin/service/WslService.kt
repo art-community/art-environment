@@ -32,8 +32,8 @@ fun EnvironmentPlugin.stopWslProcess(name: String, directory: Path) {
                 readText().takeIf { pid -> pid.isNotBlank() }
                         ?.toInt()
                         ?.let { pid ->
-                            execute("wsl", "-e", "kill", "--", "-9", pid.toString())
-                            project.attention("WSL: killed process $pid", name)
+                            execute(name, "wsl", "-e", "kill", "--", "-9", pid.toString())
+                            project.attention("WSL process killed $pid", name)
                         }
                 delete()
             }
