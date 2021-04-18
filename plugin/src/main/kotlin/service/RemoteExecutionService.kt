@@ -64,14 +64,14 @@ fun <T> RemoteClient.sftp(executor: SFTPClient.() -> T): T = with(sshClient) { n
 fun <T> RemoteClient.session(executor: Session.() -> T) = with(sshClient) { startSession().use { session -> executor(session) } }
 
 
-fun RemoteClient.exists(path: String) = execute(plugin.project.name, "test -d $path").exitStatus == 0
+fun RemoteClient.exists(path: String) = execute("test -d $path").exitStatus == 0
 
 fun RemoteClient.touchDirectory(path: String) = path.apply {
     if (exists(path)) return@apply
-    execute(plugin.project.name, "mkdir -p $this")
+    execute("mkdir -p $this")
 }
 
-fun RemoteClient.touchFile(path: String) = path.apply { execute(plugin.project.name, "touch $this") }
+fun RemoteClient.touchFile(path: String) = path.apply { execute("touch $this") }
 
 fun RemoteClient.runtimeDirectory() = touchDirectory("${configuration.directory()}/$RUNTIME")
 
@@ -79,28 +79,38 @@ fun RemoteClient.projectsDirectory() = touchDirectory("${configuration.directory
 
 fun RemoteClient.projectDirectory(name: String) = touchDirectory("${configuration.directory()}/$PROJECTS/$name")
 
-fun RemoteClient.execute(logContext: String, command: String): Session.Command = session {
+fun RemoteClient.execute(context: String, command: String): Session.Command = session {
     val result = exec(command)
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
     output.writeBytes(result.inputStream.readBytes())
     error.writeBytes(result.errorStream.readBytes())
-    val context = "[$logContext]: ${configuration.user}@${configuration.host}${configuration.port?.let { port -> ":$port" } ?: ""}"
+    var remoteContext = "${configuration.user}@${configuration.host}"
+    configuration.port?.let { port -> remoteContext += ":$port" }
+    val fullContext = "[$context]: remoteContext"
+    plugin.consoleLog(output, error, fullContext)
     plugin.project.run {
-        attention("Remote command executed - $command", context)
-        result.exitSignal?.let { signal -> attention("Exit signal - $signal", context) }
-        attention("Exit status - ${result.exitStatus}", context)
+        attention("Remote command executed - $command", fullContext)
+        result.exitSignal?.let { signal -> attention("Exit signal - $signal", fullContext) }
+        attention("Exit status - ${result.exitStatus}", fullContext)
         result.exitErrorMessage
                 ?.takeIf { message -> message.isNotBlank() }
-                ?.let { message -> attention("Exit message - $message", context) }
+                ?.let { message -> attention("Exit message - $message", fullContext) }
     }
-    plugin.consoleLog(output, error, context)
     return@session result
 }
 
-fun RemoteClient.execute(context: String, directory: String, command: String) = execute(context, "cd $directory && $command")
+fun RemoteClient.execute(command: String): Session.Command = session {
+    val result = exec(command)
+    val output = ByteArrayOutputStream()
+    val error = ByteArrayOutputStream()
+    output.writeBytes(result.inputStream.readBytes())
+    error.writeBytes(result.errorStream.readBytes())
+    return@session result
+}
 
 fun RemoteClient.sh(name: String, directory: String = runtimeDirectory(), script: () -> String) = sh(name, directory, script())
+
 fun RemoteClient.sh(name: String, directory: String, script: String) = session {
     val path = directory.resolve(name)
     val scriptPath = path.sh()
@@ -108,7 +118,7 @@ fun RemoteClient.sh(name: String, directory: String, script: String) = session {
     val stderrPath = path.stderr()
     writeExecutable(scriptPath, script)
     val command = """cd $directory && nohup bash $scriptPath 1>$stdoutPath 2>$stdoutPath &""".trimIndent()
-    execute(name, command)
+    execute(command)
     val context = "[$name]: ${configuration.user}@${configuration.host}${configuration.port?.let { port -> ":$port" } ?: ""}"
     plugin.project.run {
         attention("Remote process started", context)

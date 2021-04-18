@@ -44,12 +44,12 @@ fun EnvironmentPlugin.execute(context: String = project.name, directory: Path, v
             .redirectError(error)
             .command(*command)
             .execute()
+    consoleLog(output, error, context)
     project.run {
         attention("""Command executed - "${command.joinToString(" ")}" """, context)
         attention("Directory - $directory", context)
         attention("Exit value - ${processResult.exitValue}", context)
     }
-    consoleLog(output, error, context)
 }
 
 
