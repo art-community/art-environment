@@ -89,5 +89,3 @@ private fun EnvironmentPlugin.process(name: String, scriptPath: Path, directory:
         line()
     }
 }
-
-
