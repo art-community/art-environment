@@ -3,24 +3,23 @@ package service
 import constants.NEW_LINE
 import logger.logger
 import plugin.EnvironmentPlugin
-import plugin.plugin
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.nio.file.Path
 
-fun Path.localProcessLog(output: ByteArrayOutputStream, error: ByteArrayOutputStream, context: String = plugin.project.name) {
+fun Path.localProcessLog(output: ByteArrayOutputStream, error: ByteArrayOutputStream) {
     output.apply {
         toString()
                 .lineSequence()
                 .filter { line -> line.isNotBlank() }
-                .forEach { line -> stdout().appendText("($context): $line$NEW_LINE") }
+                .forEach { line -> stdout().appendText("$line$NEW_LINE") }
         reset()
     }
     error.apply {
         toString()
                 .lineSequence()
                 .filter { line -> line.isNotBlank() }
-                .forEach { line -> stderr().appendText("($context): $line$NEW_LINE") }
+                .forEach { line -> stderr().appendText("$line$NEW_LINE") }
         reset()
     }
 }

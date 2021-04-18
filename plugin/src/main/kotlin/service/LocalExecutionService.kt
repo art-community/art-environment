@@ -52,30 +52,6 @@ fun EnvironmentPlugin.execute(directory: Path, vararg command: String) {
 }
 
 
-fun EnvironmentPlugin.execute(path: Path, directory: Path = runtimeDirectory, script: () -> String) =
-        execute(path, directory, script())
-
-fun EnvironmentPlugin.execute(path: Path, directory: Path = runtimeDirectory, script: String) {
-    directory.touchDirectory().resolve(path).writeText(script.trimIndent())
-    val output = ByteArrayOutputStream()
-    val error = ByteArrayOutputStream()
-    val scriptPath = path.toAbsolutePath().setExecutable()
-    val processResult = ProcessExecutor()
-            .directory(directory.touchDirectory().toFile())
-            .redirectOutput(output)
-            .redirectError(error)
-            .command(scriptPath.toString())
-            .execute()
-    project.run {
-        attention("Script executed")
-        attention("Directory - $directory")
-        attention("Exit code - ${processResult.exitValue}")
-        attention("Script - $scriptPath", name)
-    }
-    consoleLog(output, error)
-}
-
-
 fun EnvironmentPlugin.bat(name: String, directory: Path = runtimeDirectory, script: () -> String) =
         process(name, directory.resolve(name).bat(), directory, script())
 
@@ -93,7 +69,7 @@ private fun EnvironmentPlugin.process(name: String, scriptPath: Path, directory:
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
     processLogsWriters[name] = processLogsExecutor.scheduleAtFixedRate(
-            { processDirectory.localProcessLog(output, error, name) },
+            { processDirectory.localProcessLog(output, error) },
             0,
             LOG_FILE_REFRESH_PERIOD,
             MILLISECONDS
@@ -105,7 +81,7 @@ private fun EnvironmentPlugin.process(name: String, scriptPath: Path, directory:
             .command(scriptPath.toAbsolutePath().toString())
             .start()
     project.run {
-        attention("New process started", name)
+        attention("Local process started", name)
         attention("Script - $scriptPath", name)
         attention("Output - ${processDirectory.stdout()}", name)
         attention("Error - ${processDirectory.stderr()}", name)

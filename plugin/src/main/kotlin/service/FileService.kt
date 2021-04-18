@@ -114,3 +114,10 @@ fun Path.stdout(): Path = Paths.get("${toAbsolutePath()}$DOT_STDOUT")
 
 fun Path.stderr(): Path = Paths.get("${toAbsolutePath()}$DOT_STDERR")
 
+fun String.sh() = "$this$DOT_SH"
+
+fun String.stdout() = "$this$DOT_STDOUT"
+
+fun String.stderr() = "$this$DOT_STDERR"
+
+fun String.resolve(path: String) = "$this/$path"
