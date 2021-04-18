@@ -120,4 +120,9 @@ fun String.stdout() = "$this$DOT_STDOUT"
 
 fun String.stderr() = "$this$DOT_STDERR"
 
+fun String.lua() = "$this$DOT_LUA"
+
+fun String.parent() = substringBeforeLast(SLASH)
+
 fun String.resolve(path: String) = "$this/$path"
+

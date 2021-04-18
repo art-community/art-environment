@@ -1,7 +1,8 @@
 package configuration
 
-import constants.RUNTIME
 import plugin.plugin
+import service.runtimeDirectory
+import service.ssh
 import service.touchDirectory
 import java.nio.file.Path
 import javax.inject.Inject
@@ -10,17 +11,23 @@ open class ExecutionConfiguration @Inject constructor() {
     var executable: String? = null
         private set
 
-    private var directory: Path? = null
+    private var localDirectory: Path? = null
+
+    private var remoteDirectory: String? = null
 
     fun executable(executable: String) {
         this.executable = executable
     }
 
-    fun directory(directory: Path) {
-        this.directory = directory
+    fun localDirectory(directory: Path) {
+        this.localDirectory = directory
     }
 
-    fun directory() = directory
-            ?.touchDirectory()
-            ?: plugin.project.projectDir.resolve(RUNTIME).toPath().touchDirectory()
+    fun remoteDirectory(directory: String) {
+        this.remoteDirectory = directory
+    }
+
+    fun localDirectory() = localDirectory?.touchDirectory() ?: plugin.runtimeDirectory
+
+    fun remoteDirectory() = remoteDirectory ?: plugin.extension.remoteConfiguration.ssh { runtimeDirectory() }
 }

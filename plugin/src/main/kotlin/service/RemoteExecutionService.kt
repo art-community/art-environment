@@ -61,9 +61,9 @@ fun <T> RemoteClient.sftp(executor: SFTPClient.() -> T): T = with(sshClient) { n
 
 fun RemoteClient.session(executor: Session.() -> Unit) = with(sshClient) { startSession().use { session -> executor(session) } }
 
-fun RemoteClient.touchDirectory(path: String) = path.apply { execute("mkdir -p $this") }
+fun RemoteClient.touchDirectory(path: String) = path.apply { execute(plugin.project.name, "mkdir -p $this") }
 
-fun RemoteClient.touchFile(path: String) = path.apply { execute("touch $this") }
+fun RemoteClient.touchFile(path: String) = path.apply { execute(plugin.project.name, "touch $this") }
 
 fun RemoteClient.runtimeDirectory() = touchDirectory("${configuration.directory()}/$RUNTIME")
 
@@ -71,25 +71,25 @@ fun RemoteClient.projectsDirectory() = touchDirectory("${configuration.directory
 
 fun RemoteClient.projectDirectory(name: String) = touchDirectory("${configuration.directory()}/$PROJECTS/$name")
 
-fun RemoteClient.execute(command: String) = session {
+fun RemoteClient.execute(logContext: String, command: String) = session {
     val result = exec(command)
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
     output.writeBytes(result.inputStream.readBytes())
     error.writeBytes(result.errorStream.readBytes())
-    val context = "${configuration.user}@${configuration.host}${configuration.port?.let { port -> ":$port" } ?: ""}"
+    val context = "[$logContext]: ${configuration.user}@${configuration.host}${configuration.port?.let { port -> ":$port" } ?: ""}"
     plugin.project.run {
-        attention("Remote command executed - $command")
-        attention("Exit signal - ${result.exitSignal}")
-        attention("Exit status - ${result.exitStatus}")
+        attention("Remote command executed - $command", context)
+        result.exitSignal?.let { signal -> attention("Exit signal - $signal", context) }
+        attention("Exit status - ${result.exitStatus}", context)
         result.exitErrorMessage
                 ?.takeIf { message -> message.isNotBlank() }
-                ?.let { message -> attention("Exit message - $message") }
+                ?.let { message -> attention("Exit message - $message", context) }
     }
     plugin.consoleLog(output, error, context)
 }
 
-fun RemoteClient.execute(directory: String, command: String) = execute("cd $directory && $command")
+fun RemoteClient.execute(context: String, directory: String, command: String) = execute(context, "cd $directory && $command")
 
 fun RemoteClient.sh(name: String, directory: String = runtimeDirectory(), script: () -> String) = sh(name, directory, script())
 fun RemoteClient.sh(name: String, directory: String, script: String) = session {
@@ -98,9 +98,9 @@ fun RemoteClient.sh(name: String, directory: String, script: String) = session {
     val stdoutPath = path.stdout()
     val stderrPath = path.stderr()
     writeExecutable(scriptPath, script)
-    val command = """bash -c "cd $directory && nohup bash $scriptPath 1>$stdoutPath 2>$stdoutPath &" """.trimIndent()
-    execute(command)
-    val context = "${configuration.user}@${configuration.host}${configuration.port?.let { port -> ":$port" } ?: ""}[$name]"
+    val command = """cd $directory && nohup bash $scriptPath 1>$stdoutPath 2>$stdoutPath &""".trimIndent()
+    execute(name, command)
+    val context = "[$name]: ${configuration.user}@${configuration.host}${configuration.port?.let { port -> ":$port" } ?: ""}"
     plugin.project.run {
         attention("Remote process started", context)
         attention("Script - $scriptPath", context)
@@ -125,5 +125,6 @@ fun RemoteClient.writeFile(remotePath: String, content: String, vararg permissio
     val attributes = FileAttributes.Builder()
             .withPermissions(setOf(*permissions))
             .build()
-    open(remotePath, modes, attributes).use { file -> file.RemoteFileOutputStream().use { stream -> stream.writer().write(content) } }
+    touchDirectory(remotePath.parent())
+    open(remotePath, modes, attributes).use { file -> file.RemoteFileOutputStream().use { stream -> stream.write(content.toByteArray()) } }
 }
