@@ -38,13 +38,13 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
         executionMode = ExecutionMode.WSL
     }
 
-    fun local(configurator: Action<in ExecutionConfiguration>) {
+    fun local(configurator: Action<in ExecutionConfiguration> = EMPTY_ACTION) {
         if (isWindows) throw localNotAvailableException("Tarantool is not supported on Windows. ")
         configurator.execute(executionConfiguration)
         executionMode = ExecutionMode.LOCAL
     }
 
-    fun remote(configurator: Action<in ExecutionConfiguration>) {
+    fun remote(configurator: Action<in ExecutionConfiguration> = EMPTY_ACTION) {
         configurator.execute(executionConfiguration)
         executionMode = ExecutionMode.REMOTE
     }

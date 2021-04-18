@@ -24,6 +24,7 @@ import constants.isWindows
 import plugin.EnvironmentPlugin
 
 fun EnvironmentPlugin.runGradleTasks(project: String, vararg tasks: String) {
-    val executable = projectsDirectory.resolve(if (isWindows) GRADLEW_BAT else GRADLEW).setExecutable().toFile().name
-    execute(projectsDirectory, executable + tasks.map { task -> ":$project:$task" })
+    val executable = projectsDirectory.resolve(if (isWindows) GRADLEW_BAT else GRADLEW).setExecutable().toFile().absoluteFile.toString()
+    val command = arrayOf(executable) + tasks.map { task -> ":$project:$task" }
+    execute(projectsDirectory, *command)
 }

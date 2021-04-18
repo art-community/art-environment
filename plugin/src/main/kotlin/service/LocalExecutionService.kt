@@ -46,7 +46,7 @@ fun EnvironmentPlugin.execute(directory: Path, vararg command: String) {
     project.run {
         attention("Command executed - ${command.joinToString(" ")}")
         attention("Directory - $directory")
-        attention("Exit code - ${processResult.exitValue}")
+        attention("Exit value - ${processResult.exitValue}")
     }
     consoleLog(output, error)
 }
