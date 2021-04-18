@@ -18,19 +18,20 @@
 
 package configurator
 
-import constants.PROJECTS
 import constants.PUBLISHING_PROPERTIES
 import constants.PUBLISHING_PROPERTIES_TEMPLATE
 import logger.attention
 import plugin.EnvironmentPlugin
+import service.projectsDirectory
+import service.writeText
 
 fun EnvironmentPlugin.configurePublishing() = extension.publishingConfiguration.run {
     if (!enabled) {
-        project.projectDir.resolve(PROJECTS).resolve(PUBLISHING_PROPERTIES).delete()
+        projectsDirectory.resolve(PUBLISHING_PROPERTIES).toFile().delete()
         return@run
     }
-    project.projectDir.resolve(PROJECTS).resolve(PUBLISHING_PROPERTIES).apply {
+    projectsDirectory.resolve(PUBLISHING_PROPERTIES).apply {
         writeText(PUBLISHING_PROPERTIES_TEMPLATE(username, password))
-        project.attention("Publishing activated. Properties: $absolutePath")
+        project.attention("Publishing activated. Properties: ${toAbsolutePath()}")
     }
 }

@@ -18,10 +18,7 @@
 
 package extension
 
-import configuration.ExecutableConfigurationImplementation
-import configuration.ProjectConfiguration
-import configuration.PublishingConfiguration
-import configuration.TarantoolConfiguration
+import configuration.*
 import constants.*
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -45,10 +42,11 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
 
     val gradlePluginConfiguration: ProjectConfiguration = objectFactory.newInstance(GRADLE_PLUGIN)
 
-    val tarantoolConfiguration: TarantoolConfiguration = objectFactory.newInstance(objectFactory.newInstance<ExecutableConfigurationImplementation>())
+    val tarantoolConfiguration: TarantoolConfiguration = objectFactory.newInstance()
 
     val publishingConfiguration: PublishingConfiguration = objectFactory.newInstance()
 
+    val remoteConfiguration: RemoteConfiguration = objectFactory.newInstance()
 
     fun url(url: String) {
         this.defaultUrl = url
@@ -86,5 +84,9 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
 
     fun publishing(configurator: Action<in PublishingConfiguration>) {
         configurator.execute(publishingConfiguration)
+    }
+
+    fun remote(configurator: Action<in RemoteConfiguration> = EMPTY_ACTION) {
+        configurator.execute(remoteConfiguration)
     }
 }

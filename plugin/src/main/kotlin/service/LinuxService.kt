@@ -41,19 +41,7 @@ fun EnvironmentPlugin.stopLinuxProcess(name: String, directory: Path) {
 }
 
 
-fun EnvironmentPlugin.restartLinuxProcess(name: String, directory: Path, script: () -> String) = process(name, directory.resolve(name).sh(), directory) {
-    buildString {
-        directory.resolve(name).pid().toFile().apply {
-            takeIf { file -> file.exists() }
-                    ?.readText()
-                    ?.takeIf { string -> string.isNotBlank() }
-                    ?.toInt()
-                    ?.let { pid ->
-                        appendLine("""kill -9 $pid""")
-                        project.attention("Linux: killed process $pid", name)
-                    }
-            delete()
-        }
-        appendLine(script())
-    }
+fun EnvironmentPlugin.restartLinuxProcess(name: String, directory: Path, script: () -> String) {
+    stopLinuxProcess(name, directory)
+    sh(name, directory, script)
 }

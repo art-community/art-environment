@@ -18,7 +18,6 @@
 
 package plugin
 
-import configuration.PathsConfiguration
 import configurator.configureTasks
 import constants.*
 import extension.ArtExtension
@@ -26,8 +25,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
 import org.gradle.process.internal.shutdown.ShutdownHooks.addShutdownHook
-import java.util.concurrent.Executors.newSingleThreadScheduledExecutor
-import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ExecutorService
 
 lateinit var plugin: EnvironmentPlugin
     private set
@@ -35,23 +33,17 @@ lateinit var plugin: EnvironmentPlugin
 class EnvironmentPlugin : Plugin<Project> {
     lateinit var project: Project
         private set
-    lateinit var paths: PathsConfiguration
-        private set
     lateinit var extension: ArtExtension
         private set
-    val localLogsScheduler: ScheduledExecutorService = newSingleThreadScheduledExecutor()
+    val executors = mutableListOf<ExecutorService>()
+
+    fun <T: ExecutorService>  register(executorService: T): T = executorService.apply { executors += this }
 
     override fun apply(project: Project): Unit = project.run {
         this@EnvironmentPlugin.project = this
         extension = extensions.create(ART, this)
         plugin = this@EnvironmentPlugin
-        paths = PathsConfiguration(
-                runtimeDirectory = plugin.project.projectDir.resolve(RUNTIME).toPath(),
-                projectsDirectory = plugin.project.projectDir.resolve(PROJECTS).toPath(),
-                remoteRuntimeDirectory = REMOTE_RUNTIME_DIRECTORY(project.name),
-                remoteScriptsDirectory = REMOTE_SCRIPTS_DIRECTORY(project.name)
-        )
-        addShutdownHook { localLogsScheduler.shutdownNow() }
+        addShutdownHook { executors.forEach(ExecutorService::shutdownNow) }
         configureTasks()
     }
 }

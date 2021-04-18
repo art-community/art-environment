@@ -40,19 +40,7 @@ fun EnvironmentPlugin.stopWslProcess(name: String, directory: Path) {
 }
 
 
-fun EnvironmentPlugin.restartWslProcess(name: String, directory: Path, script: () -> String) = process(name, directory.resolve(name).bat(), directory) {
-    buildString {
-        directory.resolve(name).pid().toFile().apply {
-            takeIf { file -> file.exists() }
-                    ?.readText()
-                    ?.takeIf { string -> string.isNotBlank() }
-                    ?.toInt()
-                    ?.let { pid ->
-                        appendLine("""wsl -e kill -- -9 $pid""")
-                        project.attention("WSL: killed process $pid", name)
-                    }
-            delete()
-        }
-        appendLine(script())
-    }
+fun EnvironmentPlugin.restartWslProcess(name: String, directory: Path, script: () -> String) {
+    stopWslProcess(name, directory)
+    bat(name, directory, script)
 }

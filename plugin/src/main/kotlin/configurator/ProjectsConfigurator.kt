@@ -32,19 +32,18 @@ import org.eclipse.jgit.merge.MergeStrategy.THEIRS
 import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
 import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import plugin.EnvironmentPlugin
-import service.writeContent
+import service.*
 import java.nio.file.Files.copy
-import java.nio.file.StandardCopyOption
 import java.nio.file.StandardCopyOption.COPY_ATTRIBUTES
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
-fun EnvironmentPlugin.configureProjects() = extension.run {
+fun EnvironmentPlugin.configureProjects() = extension.apply {
     val settings = buildString {
         appendLine(PROJECTS_NAME_TEMPLATE)
-        appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[GRADLE_PLUGIN]!!))
+        appendLine(INCLUDE_BUILD_TEMPLATE(projectName(GRADLE_PLUGIN)))
         configureProject(gradlePluginConfiguration)
         projects.forEach { project ->
-            appendLine(INCLUDE_BUILD_TEMPLATE(PROJECT_NAMES[project]!!))
+            appendLine(INCLUDE_BUILD_TEMPLATE(projectName(project)))
             when (project) {
                 JAVA -> configureProject(javaConfiguration)
                 KOTLIN -> configureProject(kotlinConfiguration)
@@ -55,22 +54,20 @@ fun EnvironmentPlugin.configureProjects() = extension.run {
         }
     }
     val buildTemplate = buildString { append(PROJECTS_GRADLE_BUILD_TEMPLATE) }
-    paths.apply {
-        projectsDirectory.resolve(SETTINGS_GRADLE).writeContent(settings)
-        projectsDirectory.resolve(BUILD_GRADLE).writeContent(buildTemplate)
-        project.copy {
-            from(project.rootDir.resolve(GRADLE).toPath())
-            into(projectsDirectory.resolve(GRADLE))
-            duplicatesStrategy = INCLUDE
-        }
-        copy(project.rootDir.resolve(GRADLEW).toPath(), projectsDirectory.resolve(GRADLEW), REPLACE_EXISTING, COPY_ATTRIBUTES)
-        copy(project.rootDir.resolve(GRADLEW_BAT).toPath(), projectsDirectory.resolve(GRADLEW_BAT), REPLACE_EXISTING, COPY_ATTRIBUTES)
+    environmentDirectory.resolve(SETTINGS_GRADLE).writeText(settings)
+    environmentDirectory.resolve(BUILD_GRADLE).writeText(buildTemplate)
+    project.copy {
+        from(environmentDirectory.resolve(GRADLE))
+        into(projectDirectory(GRADLE))
+        duplicatesStrategy = INCLUDE
     }
+    copy(environmentDirectory.resolve(GRADLEW), projectsDirectory.resolve(GRADLEW), REPLACE_EXISTING, COPY_ATTRIBUTES)
+    copy(environmentDirectory.resolve(GRADLEW_BAT), projectsDirectory.resolve(GRADLEW_BAT), REPLACE_EXISTING, COPY_ATTRIBUTES)
 }
 
 private fun EnvironmentPlugin.configureProject(configuration: ProjectConfiguration) = configuration.run {
-    val projectName = PROJECT_NAMES[name]!!
-    val directory = paths.projectsDirectory.resolve(projectName)
+    val projectName = projectName(name)
+    val directory = projectDirectory(projectName)
     val url = url ?: "${extension.defaultUrl}/$projectName"
     val version = version ?: MAIN
     val logger = project.logger(projectName)

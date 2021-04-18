@@ -24,90 +24,68 @@ import constants.*
 import constants.ExecutionMode.*
 import logger.attention
 import plugin.EnvironmentPlugin
-import plugin.plugin
 import java.nio.file.Path
 
 fun EnvironmentPlugin.restartTarantool() = extension.tarantoolConfiguration.run {
-    if (plugin.extension.tarantoolConfiguration.instances.any { instance -> instance.includeModule }) {
-        project.run { runIncludedBuildTasks(PROJECT_NAMES[TARANTOOL]!!, CLEAN, BUILD) }
+    if (instances.any { instance -> instance.includeModule }) {
+        project.run { runGradleTasks(projectName(TARANTOOL), CLEAN, BUILD) }
     }
     instances.asMap.values.forEach { instance ->
         when (executionMode) {
-            LINUX -> restartOnLocal(this, instance)
+            LOCAL -> restartOnLocal(this, instance)
             WSL -> restartOnWsl(this, instance)
-            REMOTE -> restartOnRemote(this, instance)
+            REMOTE -> TODO()
         }
-        println()
     }
 }
 
 fun EnvironmentPlugin.stopTarantool() = extension.tarantoolConfiguration.run {
     instances.asMap.keys.forEach { name ->
         when (executionMode) {
-            LINUX -> stopOnLocal(this, name)
+            LOCAL -> stopOnLocal(this, name)
             WSL -> stopOnWsl(this, name)
             REMOTE -> TODO()
         }
-        println()
     }
 }
 
 
 private fun EnvironmentPlugin.restartOnLocal(configuration: TarantoolConfiguration, instance: InstanceConfiguration) {
-    val executable = configuration.localExecutionConfiguration.executable ?: TARANTOOL
-    val directory = computeDirectory(configuration, instance.name)
+    val executable = configuration.executionConfiguration.executable ?: TARANTOOL
+    val directory = configuration.computeDirectory(instance.name)
     val scriptPath = directory.touchDirectory().resolve(instance.name)
     copyTarantoolModule(directory, instance)
     restartingLog(instance, directory, executable)
-    restartLinuxProcess(instance.name, directory) { "$executable ${scriptPath.lua().writeContent(instance.toLua())}" }
+    restartLinuxProcess(instance.name, directory) { "$executable ${scriptPath.lua().writeText(instance.toLua())}" }
 }
 
-private fun EnvironmentPlugin.stopOnLocal(configuration: TarantoolConfiguration, name: String) = stopLinuxProcess(name, computeDirectory(configuration, name))
-
-private fun EnvironmentPlugin.restartOnRemote(configuration: TarantoolConfiguration, instance: InstanceConfiguration) {
-    val executable = configuration.localExecutionConfiguration.executable ?: TARANTOOL
-    val directory = computeDirectory(configuration, instance.name)
-    val scriptPath = directory.touchDirectory().resolve(instance.name)
-    copyTarantoolModule(directory, instance)
-    restartingLog(instance, directory, executable)
-    configuration.remoteExecutionConfiguration.ssh {
-        writeFile("/home/anton/art/${scriptPath.lua().toFile().name}", instance.toLua())
-        execute("/home/anton/art/test.sh") {
-            "$executable /home/anton/art/${scriptPath.lua().toFile().name}"
-        }
-    }
-}
-
-private fun EnvironmentPlugin.stopOnRemote(configuration: TarantoolConfiguration, name: String) = stopLinuxProcess(name, computeDirectory(configuration, name))
-
+private fun EnvironmentPlugin.stopOnLocal(configuration: TarantoolConfiguration, name: String) =
+        stopLinuxProcess(name, configuration.computeDirectory(name))
 
 private fun EnvironmentPlugin.restartOnWsl(configuration: TarantoolConfiguration, instance: InstanceConfiguration) {
-    val executable = configuration.localExecutionConfiguration.executable ?: TARANTOOL
-    val directory = computeDirectory(configuration, instance.name)
+    val executable = configuration.executionConfiguration.executable ?: TARANTOOL
+    val directory = configuration.computeDirectory(instance.name)
     val scriptPath = directory.touchDirectory().resolve(instance.name)
     copyTarantoolModule(directory, instance)
     restartingLog(instance, directory, executable)
-    restartWslProcess(instance.name, directory) { "wsl -e $executable -- ${scriptPath.lua().writeContent(instance.toLua()).toWsl()}" }
+    restartWslProcess(instance.name, directory) { "wsl -e $executable -- ${scriptPath.lua().writeText(instance.toLua()).toWsl()}" }
 }
 
-private fun EnvironmentPlugin.stopOnWsl(configuration: TarantoolConfiguration, name: String) = stopWslProcess(name, computeDirectory(configuration, name))
+private fun EnvironmentPlugin.stopOnWsl(configuration: TarantoolConfiguration, name: String) =
+        stopWslProcess(name, configuration.computeDirectory(name))
 
 
 private fun EnvironmentPlugin.copyTarantoolModule(directory: Path, instance: InstanceConfiguration) {
     project.run {
-        directory.resolve(PROJECT_NAMES[TARANTOOL]!!)
-                .lua()
-                .toFile()
-                .delete()
+        directory.resolve(ART_TARANTOOL_LUA).toFile().delete()
         if (!instance.includeModule) {
             return
         }
         copy {
-            projectDir.resolve(PROJECTS)
-                    .resolve(PROJECT_NAMES[TARANTOOL]!!)
+            projectDirectory(TARANTOOL)
                     .resolve(BUILD)
                     .resolve(DESTINATION)
-                    .resolve(PROJECT_NAMES[TARANTOOL]!!).toPath().lua()
+                    .resolve(ART_TARANTOOL_LUA)
                     .takeIf { lua -> lua.toFile().exists() }
                     ?.let { lua -> from(lua); into(directory) }
         }
@@ -121,9 +99,6 @@ private fun EnvironmentPlugin.restartingLog(instance: InstanceConfiguration, dir
     attention("Script - \n${instance.toLua()}", instance.name)
 }
 
-private fun EnvironmentPlugin.computeDirectory(configuration: TarantoolConfiguration, name: String): Path {
-    return configuration.localExecutionConfiguration.directory
-            ?.resolve(name)
-            ?.touchDirectory()
-            ?: paths.runtimeDirectory.resolve(TARANTOOL).resolve(name).touchDirectory()
-}
+private fun TarantoolConfiguration.computeDirectory(name: String): Path = executionConfiguration.directory()
+        .resolve(TARANTOOL)
+        .resolve(name)

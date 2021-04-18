@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-package service
+package constants
 
-import logger.attention
-import plugin.EnvironmentPlugin
-import java.nio.file.Path
+const val RUNTIME = "runtime"
+const val PROJECTS = "projects"
+const val DESTINATION = "destination"

@@ -46,7 +46,7 @@ enum class LogMessageColor(val code: String) {
 
 fun message(message: String, color: LogMessageColor) = "${color.code}$message$ANSI_RESET"
 
-fun Project.logger(context: String) = ContestedLogger(context, this)
+fun Project.logger(context: String) = ContextLogger(context, this)
 
 fun Project.quiet(message: String, context: String = project.name, color: LogMessageColor = BLACK) {
     logger.quiet("${color.code}${LOG_TEMPLATE(context, message)}$ANSI_RESET")

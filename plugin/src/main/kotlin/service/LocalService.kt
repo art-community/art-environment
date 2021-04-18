@@ -18,24 +18,21 @@
 
 package service
 
-import constants.EMPTY_STRING
 import constants.LOG_FILE_REFRESH_PERIOD
-import constants.NEW_LINE
 import logger.attention
-import logger.error
 import org.zeroturnaround.exec.ProcessExecutor
 import plugin.EnvironmentPlugin
 import plugin.plugin
 import java.io.ByteArrayOutputStream
-import java.io.OutputStream
 import java.nio.file.Path
+import java.util.concurrent.Executors.newSingleThreadScheduledExecutor
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
 private val processLogsWriters = mutableMapOf<String, Future<*>>()
+private val processLogsExecutor = plugin.register(newSingleThreadScheduledExecutor())
 
-
-fun EnvironmentPlugin.execute(vararg command: String) = execute(plugin.paths.runtimeDirectory, *command)
+fun EnvironmentPlugin.execute(vararg command: String) = execute(runtimeDirectory, *command)
 
 fun EnvironmentPlugin.execute(directory: Path, vararg command: String) {
     val output = ByteArrayOutputStream()
@@ -51,17 +48,18 @@ fun EnvironmentPlugin.execute(directory: Path, vararg command: String) {
         attention("Directory - $directory")
         attention("Exit code - ${processResult.exitValue}")
     }
-    logExecution(output, error)
+    consoleLog(output, error)
 }
 
 
-fun EnvironmentPlugin.execute(path: Path, directory: Path = plugin.paths.runtimeDirectory, script: () -> String) = execute(path, directory, script())
+fun EnvironmentPlugin.execute(path: Path, directory: Path = runtimeDirectory, script: () -> String) =
+        execute(path, directory, script())
 
-fun EnvironmentPlugin.execute(path: Path, directory: Path = plugin.paths.runtimeDirectory, script: String) {
-    directory.touchDirectory().resolve(path).writeContent(script.trimIndent())
+fun EnvironmentPlugin.execute(path: Path, directory: Path = runtimeDirectory, script: String) {
+    directory.touchDirectory().resolve(path).writeText(script.trimIndent())
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
-    val scriptPath = path.toAbsolutePath().apply { toFile().setExecutable(true) }
+    val scriptPath = path.toAbsolutePath().setExecutable()
     val processResult = ProcessExecutor()
             .directory(directory.touchDirectory().toFile())
             .redirectOutput(output)
@@ -74,67 +72,44 @@ fun EnvironmentPlugin.execute(path: Path, directory: Path = plugin.paths.runtime
         attention("Exit code - ${processResult.exitValue}")
         attention("Script - $scriptPath", name)
     }
-    logExecution(output, error)
+    consoleLog(output, error)
 }
 
 
-fun EnvironmentPlugin.process(name: String, path: Path, directory: Path = plugin.paths.runtimeDirectory, script: () -> String) = process(name, path, directory, script())
+fun EnvironmentPlugin.bat(name: String, directory: Path = runtimeDirectory, script: () -> String) =
+        process(name, directory.resolve(name).bat(), directory, script())
 
-fun EnvironmentPlugin.process(name: String, path: Path, directory: Path = plugin.paths.runtimeDirectory, script: String) {
+fun EnvironmentPlugin.sh(name: String, directory: Path = runtimeDirectory, script: () -> String) =
+        process(name, directory.resolve(name).sh(), directory, script())
+
+private fun EnvironmentPlugin.process(name: String, scriptPath: Path, directory: Path = runtimeDirectory, script: String) {
+    val processDirectory = directory.resolve(name)
     runCatching {
         processLogsWriters.remove(name)?.cancel(true)
-        directory.resolve(name).stdout().toFile().writeText(EMPTY_STRING)
-        directory.resolve(name).stderr().toFile().writeText(EMPTY_STRING)
+        processDirectory.stdout().clear()
+        processDirectory.stderr().clear()
     }
-    directory.resolve(path).writeContent(script.trimIndent()).apply { toFile().setExecutable(true) }
+    directory.resolve(scriptPath).writeText(script.trimIndent()).setExecutable()
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
-    processLogsWriters[name] = localLogsScheduler.scheduleAtFixedRate(
-            { name.logProcess(directory.resolve(name), output, error) },
+    processLogsWriters[name] = processLogsExecutor.scheduleAtFixedRate(
+            { processDirectory.localProcessLog(output, error, name) },
             0,
             LOG_FILE_REFRESH_PERIOD,
             MILLISECONDS
     )
-    val scriptPath = path.toAbsolutePath().toString()
     ProcessExecutor()
             .directory(directory.toFile())
             .redirectOutputAlsoTo(output)
             .redirectErrorAlsoTo(error)
-            .command(scriptPath)
+            .command(scriptPath.toAbsolutePath().toString())
             .start()
     project.run {
         attention("New process started", name)
         attention("Script - $scriptPath", name)
-        attention("Output - ${directory.resolve(name).stdout()}", name)
-        attention("Error - ${directory.resolve(name).stderr()}", name)
+        attention("Output - ${processDirectory.stdout()}", name)
+        attention("Error - ${processDirectory.stderr()}", name)
     }
 }
 
 
-private fun String.logProcess(log: Path, output: ByteArrayOutputStream, error: ByteArrayOutputStream) {
-    output.apply {
-        toString()
-                .lineSequence()
-                .filter { line -> line.isNotBlank() }
-                .forEach { line -> log.stdout().appendContent("(${this@logProcess}): $line$NEW_LINE") }
-        reset()
-    }
-    error.apply {
-        toString()
-                .lineSequence()
-                .filter { line -> line.isNotBlank() }
-                .forEach { line -> log.stderr().appendContent("(${this@logProcess}): $line$NEW_LINE") }
-        reset()
-    }
-}
-
-private fun EnvironmentPlugin.logExecution(output: OutputStream, error: OutputStream) {
-    output.toString()
-            .lineSequence()
-            .filter { line -> line.isNotBlank() }
-            .forEach { line -> project.attention(line) }
-    error.toString()
-            .lineSequence()
-            .filter { line -> line.isNotBlank() }
-            .forEach { line -> project.error(line) }
-}

@@ -19,8 +19,23 @@
 package service
 
 import constants.*
-import java.nio.charset.Charset
+import plugin.EnvironmentPlugin
+import java.nio.charset.Charset.defaultCharset
 import java.nio.file.Path
+import java.nio.file.Paths
+
+val EnvironmentPlugin.environmentDirectory: Path
+    get() = project.projectDir.toPath()
+
+val EnvironmentPlugin.projectsDirectory
+    get() = project.projectDir.resolve(PROJECTS).toPath().touchDirectory()
+
+val EnvironmentPlugin.runtimeDirectory
+    get() = project.projectDir.resolve(RUNTIME).toPath().touchDirectory()
+
+fun EnvironmentPlugin.projectDirectory(project: String): Path =
+        projectsDirectory.resolve(PROJECT_NAMES[project]!!)
+
 
 fun Path.touchDirectory(): Path {
     if (toFile().exists()) return this
@@ -30,35 +45,40 @@ fun Path.touchDirectory(): Path {
     return this
 }
 
-fun Path.writeContent(content: String): Path {
+fun Path.writeText(text: String): Path {
     val asFile = parent.toFile()
     if (asFile.exists()) {
         if (!asFile.exists()) asFile.createNewFile()
-        toFile().writeText(content, charset = Charset.defaultCharset())
+        toFile().writeText(text, charset = defaultCharset())
         return this
     }
     if (!asFile.mkdirs()) {
         throw fileCreationException(parent)
     }
     if (!asFile.exists()) asFile.createNewFile()
-    asFile.writeText(content, charset = Charset.defaultCharset())
+    asFile.writeText(text, charset = defaultCharset())
     return this
 }
 
-fun Path.appendContent(content: String): Path {
+fun Path.appendText(text: String): Path {
     val asFile = toFile()
     if (parent.toFile().exists()) {
         if (!asFile.exists()) asFile.createNewFile()
-        asFile.appendText(content, charset = Charset.defaultCharset())
+        asFile.appendText(text, charset = defaultCharset())
         return this
     }
     if (!parent.toFile().mkdirs()) {
         throw fileCreationException(parent)
     }
     if (!asFile.exists()) asFile.createNewFile()
-    asFile.appendText(content, charset = Charset.defaultCharset())
+    asFile.appendText(text, charset = defaultCharset())
     return this
 }
+
+fun Path.setExecutable() = apply { toFile().setExecutable(true) }
+
+fun Path.clear() = toFile().writeText(EMPTY_STRING)
+
 
 fun Path.toWsl(): String {
     var path = this.toAbsolutePath().toString()
@@ -81,3 +101,16 @@ fun Path.toWsl(): String {
     }
     return toString()
 }
+
+fun Path.bat(): Path = Paths.get("${toAbsolutePath()}$DOT_BAT")
+
+fun Path.sh(): Path = Paths.get("${toAbsolutePath()}$DOT_SH")
+
+fun Path.lua(): Path = Paths.get("${toAbsolutePath()}$DOT_LUA")
+
+fun Path.pid(): Path = Paths.get("${toAbsolutePath()}$DOT_PID")
+
+fun Path.stdout(): Path = Paths.get("${toAbsolutePath()}$DOT_STDOUT")
+
+fun Path.stderr(): Path = Paths.get("${toAbsolutePath()}$DOT_STDERR")
+
