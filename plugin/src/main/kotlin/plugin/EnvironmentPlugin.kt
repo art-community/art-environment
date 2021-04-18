@@ -35,7 +35,7 @@ class EnvironmentPlugin : Plugin<Project> {
         private set
     lateinit var extension: ArtExtension
         private set
-    val executors = mutableListOf<ExecutorService>()
+    private val executors = mutableListOf<ExecutorService>()
 
     fun <T: ExecutorService>  register(executorService: T): T = executorService.apply { executors += this }
 

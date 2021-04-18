@@ -54,20 +54,20 @@ fun EnvironmentPlugin.configureProjects() = extension.apply {
         }
     }
     val buildTemplate = buildString { append(PROJECTS_GRADLE_BUILD_TEMPLATE) }
-    environmentDirectory.resolve(SETTINGS_GRADLE).writeText(settings)
-    environmentDirectory.resolve(BUILD_GRADLE).writeText(buildTemplate)
+    projectsDirectory.resolve(SETTINGS_GRADLE).writeText(settings)
+    projectsDirectory.resolve(BUILD_GRADLE).writeText(buildTemplate)
     project.copy {
         from(environmentDirectory.resolve(GRADLE))
-        into(projectDirectory(GRADLE))
+        into(projectDirectory(GRADLE_PLUGIN))
         duplicatesStrategy = INCLUDE
     }
-    copy(environmentDirectory.resolve(GRADLEW), projectsDirectory.resolve(GRADLEW), REPLACE_EXISTING, COPY_ATTRIBUTES)
-    copy(environmentDirectory.resolve(GRADLEW_BAT), projectsDirectory.resolve(GRADLEW_BAT), REPLACE_EXISTING, COPY_ATTRIBUTES)
+    copy(environmentDirectory.parent.resolve(GRADLEW), projectsDirectory.resolve(GRADLEW), REPLACE_EXISTING, COPY_ATTRIBUTES)
+    copy(environmentDirectory.parent.resolve(GRADLEW_BAT), projectsDirectory.resolve(GRADLEW_BAT), REPLACE_EXISTING, COPY_ATTRIBUTES)
 }
 
 private fun EnvironmentPlugin.configureProject(configuration: ProjectConfiguration) = configuration.run {
-    val projectName = projectName(name)
-    val directory = projectDirectory(projectName)
+    val projectName = projectName(configuration.name)
+    val directory = projectsDirectory.resolve(projectName)
     val url = url ?: "${extension.defaultUrl}/$projectName"
     val version = version ?: MAIN
     val logger = project.logger(projectName)
