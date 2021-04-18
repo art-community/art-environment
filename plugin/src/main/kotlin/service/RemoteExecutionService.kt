@@ -39,6 +39,8 @@ import java.nio.file.Files.createDirectories
 import java.nio.file.Path
 
 
+private val touchedDirectories = mutableSetOf<String>()
+
 data class RemoteClient(val configuration: RemoteConfiguration, val sshClient: SSHClient)
 
 fun <T> RemoteConfiguration.ssh(executor: RemoteClient.() -> T): T {
@@ -59,9 +61,15 @@ fun <T> RemoteConfiguration.ssh(executor: RemoteClient.() -> T): T {
 
 fun <T> RemoteClient.sftp(executor: SFTPClient.() -> T): T = with(sshClient) { newSFTPClient().use { client -> executor(client) } }
 
-fun RemoteClient.session(executor: Session.() -> Unit) = with(sshClient) { startSession().use { session -> executor(session) } }
+fun <T> RemoteClient.session(executor: Session.() -> T) = with(sshClient) { startSession().use { session -> executor(session) } }
 
-fun RemoteClient.touchDirectory(path: String) = path.apply { execute(plugin.project.name, "mkdir -p $this") }
+
+fun RemoteClient.exists(path: String) = execute(plugin.project.name, "test -d $path").exitStatus == 0
+
+fun RemoteClient.touchDirectory(path: String) = path.apply {
+    if (exists(path)) return@apply
+    execute(plugin.project.name, "mkdir -p $this")
+}
 
 fun RemoteClient.touchFile(path: String) = path.apply { execute(plugin.project.name, "touch $this") }
 
@@ -71,7 +79,7 @@ fun RemoteClient.projectsDirectory() = touchDirectory("${configuration.directory
 
 fun RemoteClient.projectDirectory(name: String) = touchDirectory("${configuration.directory()}/$PROJECTS/$name")
 
-fun RemoteClient.execute(logContext: String, command: String) = session {
+fun RemoteClient.execute(logContext: String, command: String): Session.Command = session {
     val result = exec(command)
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
@@ -87,6 +95,7 @@ fun RemoteClient.execute(logContext: String, command: String) = session {
                 ?.let { message -> attention("Exit message - $message", context) }
     }
     plugin.consoleLog(output, error, context)
+    return@session result
 }
 
 fun RemoteClient.execute(context: String, directory: String, command: String) = execute(context, "cd $directory && $command")
