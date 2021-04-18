@@ -18,13 +18,17 @@
 
 package service
 
+import constants.GRADLEW
 import constants.GRADLEW_BAT
 import constants.PROJECTS
+import constants.isWindows
 import org.gradle.api.Project
 
 fun Project.runIncludedBuildTasks(build: String, vararg tasks: String) = project.run {
     exec {
-        commandLine(projectDir.resolve(PROJECTS).resolve(GRADLEW_BAT))
+        val gradlew = projectDir.resolve(PROJECTS).resolve(if(isWindows) GRADLEW_BAT else GRADLEW)
+        gradlew.setExecutable(true)
+        commandLine(gradlew)
         workingDir(projectDir.resolve(PROJECTS))
         tasks.forEach { task -> args(":$build:$task") }
     }

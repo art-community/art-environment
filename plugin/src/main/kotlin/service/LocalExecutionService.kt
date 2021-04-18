@@ -61,7 +61,7 @@ fun EnvironmentPlugin.execute(path: Path, directory: Path = plugin.paths.runtime
     directory.touchDirectory().resolve(path).writeContent(script.trimIndent())
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
-    val scriptPath = path.toAbsolutePath()
+    val scriptPath = path.toAbsolutePath().apply { toFile().setExecutable(true) }
     val processResult = ProcessExecutor()
             .directory(directory.touchDirectory().toFile())
             .redirectOutput(output)
@@ -86,7 +86,7 @@ fun EnvironmentPlugin.process(name: String, path: Path, directory: Path = plugin
         directory.resolve(name).stdout().toFile().writeText(EMPTY_STRING)
         directory.resolve(name).stderr().toFile().writeText(EMPTY_STRING)
     }
-    directory.resolve(path).writeContent(script.trimIndent())
+    directory.resolve(path).writeContent(script.trimIndent()).apply { toFile().setExecutable(true) }
     val output = ByteArrayOutputStream()
     val error = ByteArrayOutputStream()
     processLogsWriters[name] = localLogsScheduler.scheduleAtFixedRate(

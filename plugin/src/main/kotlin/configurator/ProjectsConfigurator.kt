@@ -34,6 +34,8 @@ import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import plugin.EnvironmentPlugin
 import service.writeContent
 import java.nio.file.Files.copy
+import java.nio.file.StandardCopyOption
+import java.nio.file.StandardCopyOption.COPY_ATTRIBUTES
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 fun EnvironmentPlugin.configureProjects() = extension.run {
@@ -61,8 +63,8 @@ fun EnvironmentPlugin.configureProjects() = extension.run {
             into(projectsDirectory.resolve(GRADLE))
             duplicatesStrategy = INCLUDE
         }
-        copy(project.rootDir.resolve(GRADLEW).toPath(), projectsDirectory.resolve(GRADLEW), REPLACE_EXISTING)
-        copy(project.rootDir.resolve(GRADLEW_BAT).toPath(), projectsDirectory.resolve(GRADLEW_BAT), REPLACE_EXISTING)
+        copy(project.rootDir.resolve(GRADLEW).toPath(), projectsDirectory.resolve(GRADLEW), REPLACE_EXISTING, COPY_ATTRIBUTES)
+        copy(project.rootDir.resolve(GRADLEW_BAT).toPath(), projectsDirectory.resolve(GRADLEW_BAT), REPLACE_EXISTING, COPY_ATTRIBUTES)
     }
 }
 
