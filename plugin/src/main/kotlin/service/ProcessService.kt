@@ -59,7 +59,7 @@ fun EnvironmentPlugin.stopLinuxLocalProcess(name: String, directory: Path) {
 fun RemoteClient.stopLinuxRemoteProcess(name: String, directory: String) {
     directory.resolve(name)
             .pid()
-            .takeIf(::exists)
+            .takeIf(::fileExists)
             ?.apply {
                 readFile(this).takeIf { pid -> pid.isNotBlank() }
                         ?.toInt()

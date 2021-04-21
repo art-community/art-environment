@@ -73,14 +73,16 @@ fun RemoteClient.context(name: String = EMPTY_STRING) = with(configuration) {
     }
 }
 
-fun RemoteClient.exists(path: String) = execute("test -d $path").exitStatus == 0
+fun RemoteClient.directoryExists(path: String) = execute("test -d $path").exitStatus == 0
+
+fun RemoteClient.fileExists(path: String) = execute("test -f $path").exitStatus == 0
 
 fun RemoteClient.kill(pid: Int) = execute("kill -9 $pid")
 
 fun RemoteClient.delete(path: String) = execute("rm -rf $path")
 
 fun RemoteClient.touchDirectory(path: String) = path.apply {
-    if (exists(path)) return@apply
+    if (directoryExists(path)) return@apply
     execute("mkdir -p $this")
 }
 
@@ -113,14 +115,7 @@ fun RemoteClient.execute(context: String, command: String): Session.Command = se
     return@session result
 }
 
-fun RemoteClient.execute(command: String): Session.Command = session {
-    val result = exec(command)
-    val output = ByteArrayOutputStream()
-    val error = ByteArrayOutputStream()
-    output.writeBytes(result.inputStream.readBytes())
-    error.writeBytes(result.errorStream.readBytes())
-    return@session result
-}
+fun RemoteClient.execute(command: String): Session.Command = execute(EMPTY_STRING, command)
 
 fun RemoteClient.sh(name: String, directory: String = runtimeDirectory(), script: () -> String) = sh(name, directory, script())
 
