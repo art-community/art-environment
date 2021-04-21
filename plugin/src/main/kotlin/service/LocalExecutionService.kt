@@ -144,6 +144,6 @@ fun <T> EnvironmentPlugin.wsl(trace: Boolean = project.logger.isTraceEnabled, co
 
 fun wslCommand(executable: String, vararg arguments: String) =
         when {
-            arguments.isEmpty() -> arrayOf(WSL, BASH, executable)
+            arguments.isEmpty() -> arrayOf(WSL, E_ARGUMENT, executable)
             else -> arrayOf(WSL, E_ARGUMENT, executable, PASS_ARGUMENTS) + arguments
         }
