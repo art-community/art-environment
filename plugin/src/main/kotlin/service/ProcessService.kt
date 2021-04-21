@@ -77,7 +77,7 @@ fun RemoteClient.stopLinuxRemoteProcess(name: String, directory: String) {
 
 fun EnvironmentPlugin.restartWslProcess(name: String, directory: Path, script: () -> String) {
     stopWslProcess(name, directory)
-    wsl { bat(name, directory, script) }
+    wsl { sh(name, directory, script) }
 }
 
 fun EnvironmentPlugin.restartLinuxLocalProcess(name: String, directory: Path, script: () -> String) {

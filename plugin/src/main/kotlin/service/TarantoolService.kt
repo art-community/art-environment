@@ -73,7 +73,7 @@ private fun EnvironmentPlugin.restartOnWsl(configuration: TarantoolConfiguration
     localCopyTarantoolModule(directory, instance)
     printRestartingLog(instance, directory.toString(), executable)
     restartWslProcess(instance.name, directory) {
-        wslCommand(executable, scriptPath.lua().writeText(instance.toLua()).toWsl()).joinToString(SPACE)
+        "$executable ${scriptPath.lua().writeText(instance.toLua()).toWsl()}"
     }
 }
 

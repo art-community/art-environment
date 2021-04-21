@@ -61,7 +61,7 @@ class LocalExecutionService(private var trace: Boolean, private var context: Str
     fun execute(directory: Path, vararg command: String): ProcessResult {
         val arguments = when (mode) {
             NATIVE_COMMAND -> command
-            WSL_COMMAND -> wslCommand(command[0], *command.drop(1).toTypedArray())
+            WSL_COMMAND -> if (command.size == 1) wslCommand(command[0]) else wslCommand(command[0], *command.drop(1).toTypedArray())
         }
         val output = ByteArrayOutputStream()
         val error = ByteArrayOutputStream()
@@ -103,20 +103,40 @@ class LocalExecutionService(private var trace: Boolean, private var context: Str
                 LOG_FILE_REFRESH_PERIOD,
                 MILLISECONDS
         )
-        val process = ProcessExecutor()
-                .directory(directory.toFile())
-                .redirectOutputAlsoTo(output)
-                .redirectErrorAlsoTo(error)
-                .command(scriptPath.toAbsolutePath().toString())
-                .start()
-        plugin.project.run {
-            attention("Local process started", name)
-            attention("Script - $scriptPath", name)
-            attention("Output - ${processDirectory.stdout()}", name)
-            attention("Error - ${processDirectory.stderr()}", name)
-            line()
+        when (mode) {
+            NATIVE_COMMAND -> {
+                val process = ProcessExecutor()
+                        .directory(directory.toFile())
+                        .redirectOutputAlsoTo(output)
+                        .redirectErrorAlsoTo(error)
+                        .command(scriptPath.toAbsolutePath().toString())
+                        .start()
+                plugin.project.run {
+                    attention("Local process started", name)
+                    attention("Script - $scriptPath", name)
+                    attention("Output - ${processDirectory.stdout()}", name)
+                    attention("Error - ${processDirectory.stderr()}", name)
+                    line()
+                    return process
+                }
+            }
+            WSL_COMMAND -> {
+                val process = ProcessExecutor()
+                        .directory(directory.toFile())
+                        .redirectOutputAlsoTo(output)
+                        .redirectErrorAlsoTo(error)
+                        .command(WSL, "-e", "bash", "--", scriptPath.toWsl())
+                        .start()
+                plugin.project.run {
+                    attention("WSL process started", name)
+                    attention("Script - $scriptPath", name)
+                    attention("Output - ${processDirectory.stdout()}", name)
+                    attention("Error - ${processDirectory.stderr()}", name)
+                    line()
+                    return process
+                }
+            }
         }
-        return process
     }
 }
 
@@ -126,4 +146,4 @@ fun <T> EnvironmentPlugin.native(trace: Boolean = false, context: String = proje
 fun <T> EnvironmentPlugin.wsl(trace: Boolean = false, context: String = project.name, service: LocalExecutionService.() -> T): T =
         service(LocalExecutionService(trace, context, WSL_COMMAND))
 
-fun wslCommand(executable: String, vararg arguments: String) = arrayOf(WSL, "-e", executable, "--", arguments.joinToString(SPACE))
+fun wslCommand(executable: String, vararg arguments: String) = if (arguments.isEmpty()) arrayOf(WSL, "-e", executable) else arrayOf(WSL, "-e", executable, "--", arguments.joinToString(SPACE))
