@@ -21,13 +21,14 @@ package service
 import constants.*
 import plugin.EnvironmentPlugin
 import java.io.File
+import java.io.IOException
 import java.nio.charset.Charset.defaultCharset
 import java.nio.file.Files
 import java.nio.file.Files.*
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import java.nio.file.StandardCopyOption.*
+import java.util.*
 
 val EnvironmentPlugin.environmentDirectory: Path
     get() = project.projectDir.toPath()
@@ -112,6 +113,31 @@ fun File.deleteRecursive(): Boolean {
     return delete()
 }
 
+fun Path.copyRecursive(to: Path) {
+    val file = toFile()
+    if (!file.exists()) {
+        return
+    }
+    try {
+        if (file.isFile) {
+            if (!to.parent.toFile().exists()) {
+                createDirectories(to.parent)
+            }
+            copy(this, to, REPLACE_EXISTING)
+            return
+        }
+        val children = file.listFiles()
+        if (children.isNullOrEmpty()) {
+            return
+        }
+        for (child in children) {
+            val toPath = to.resolve(child.toPath().fileName)
+            child.toPath().copyRecursive(toPath)
+        }
+    } catch (ioException: IOException) {
+        ioException.printStackTrace()
+    }
+}
 
 fun Path.toWsl(): String {
     var path = this.toAbsolutePath().toString()
