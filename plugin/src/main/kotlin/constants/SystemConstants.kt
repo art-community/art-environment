@@ -30,3 +30,5 @@ val isAix: Boolean
 
 val isSunos: Boolean
     get() = OS.contains(SUNOS)
+
+const val WSL = "wsl"

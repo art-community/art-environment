@@ -1,6 +1,7 @@
 package configuration
 
 import plugin.plugin
+import service.remote
 import service.runtimeDirectory
 import service.ssh
 import service.touchDirectory
@@ -29,5 +30,6 @@ open class ExecutionConfiguration @Inject constructor() {
 
     fun localDirectory() = localDirectory?.touchDirectory() ?: plugin.runtimeDirectory
 
-    fun remoteDirectory() = remoteDirectory ?: plugin.extension.remoteConfiguration.ssh { runtimeDirectory() }
+    fun remoteDirectory() = remoteDirectory
+            ?: plugin.extension.remoteConfiguration.ssh { remote { runtimeDirectory() } }
 }

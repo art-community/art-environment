@@ -32,7 +32,7 @@ fun EnvironmentPlugin.stopWslProcess(name: String, directory: Path) {
                 readText().takeIf { pid -> pid.isNotBlank() }
                         ?.toInt()
                         ?.let { pid ->
-                            execute(name, "wsl", "-e", "kill", "--", "-9", pid.toString())
+                            wsl { kill(pid) }
                             project.attention("WSL process killed $pid", name)
                         }
                 delete()
@@ -48,7 +48,7 @@ fun EnvironmentPlugin.stopLinuxLocalProcess(name: String, directory: Path) {
                 readText().takeIf { pid -> pid.isNotBlank() }
                         ?.toInt()
                         ?.let { pid ->
-                            execute(name, "kill", "-9", pid.toString())
+                            native { kill(pid) }
                             project.attention("Linux process killed $pid", name)
                         }
                 delete()
@@ -57,33 +57,35 @@ fun EnvironmentPlugin.stopLinuxLocalProcess(name: String, directory: Path) {
 }
 
 fun RemoteClient.stopLinuxRemoteProcess(name: String, directory: String) {
-    directory.resolve(name)
-            .pid()
-            .takeIf(::fileExists)
-            ?.apply {
-                readFile(this).takeIf { pid -> pid.isNotBlank() }
-                        ?.toInt()
-                        ?.let { pid ->
-                            kill(pid)
-                            plugin.project.attention("Linux process killed $pid", context(name))
-                        }
-                delete(this)
+    remote(context = name) {
+        directory.resolve(name)
+                .pid()
+                .takeIf(::fileExists)
+                ?.apply {
+                    readFile(this).takeIf { pid -> pid.isNotBlank() }
+                            ?.toInt()
+                            ?.let { pid ->
+                                kill(pid)
+                                plugin.project.attention("Linux process killed $pid", context())
+                            }
+                    delete(this)
 
-            }
+                }
+    }
 }
 
 
 fun EnvironmentPlugin.restartWslProcess(name: String, directory: Path, script: () -> String) {
     stopWslProcess(name, directory)
-    bat(name, directory, script)
+    wsl { bat(name, directory, script) }
 }
 
 fun EnvironmentPlugin.restartLinuxLocalProcess(name: String, directory: Path, script: () -> String) {
     stopLinuxLocalProcess(name, directory)
-    sh(name, directory, script)
+    native { sh(name, directory, script) }
 }
 
 fun RemoteClient.restartLinuxRemoteProcess(name: String, directory: String, script: () -> String) {
     stopLinuxRemoteProcess(name, directory)
-    sh(name, directory, script)
+    remote { sh(name, directory, script) }
 }

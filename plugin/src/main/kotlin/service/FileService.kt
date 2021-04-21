@@ -20,6 +20,7 @@ package service
 
 import constants.*
 import plugin.EnvironmentPlugin
+import java.io.File
 import java.nio.charset.Charset.defaultCharset
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -77,7 +78,7 @@ fun Path.appendText(text: String): Path {
 
 fun Path.setExecutable() = apply { toFile().setExecutable(true) }
 
-fun Path.clear() = toFile().writeText(EMPTY_STRING)
+fun Path.clear() = toFile().takeIf(File::exists)?.writeText(EMPTY_STRING)
 
 
 fun Path.toWsl(): String {

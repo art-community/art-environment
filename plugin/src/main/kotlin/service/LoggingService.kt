@@ -7,7 +7,7 @@ import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.nio.file.Path
 
-fun Path.localProcessLog(output: ByteArrayOutputStream, error: ByteArrayOutputStream) {
+fun Path.printToFile(output: ByteArrayOutputStream, error: ByteArrayOutputStream) {
     output.apply {
         toString()
                 .lineSequence()
@@ -24,7 +24,7 @@ fun Path.localProcessLog(output: ByteArrayOutputStream, error: ByteArrayOutputSt
     }
 }
 
-fun EnvironmentPlugin.consoleLog(output: OutputStream, error: OutputStream, context: String = project.name) {
+fun EnvironmentPlugin.printToConsole(output: OutputStream, error: OutputStream, context: String = project.name) {
     val logger = project.logger(context)
     output.toString()
             .lineSequence()

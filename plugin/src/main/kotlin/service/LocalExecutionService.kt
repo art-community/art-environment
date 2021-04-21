@@ -19,11 +19,17 @@
 package service
 
 import constants.LOG_FILE_REFRESH_PERIOD
+import constants.SPACE
+import constants.WSL
 import logger.attention
 import logger.line
 import org.zeroturnaround.exec.ProcessExecutor
+import org.zeroturnaround.exec.ProcessResult
+import org.zeroturnaround.exec.StartedProcess
 import plugin.EnvironmentPlugin
 import plugin.plugin
+import service.LocalExecutionMode.NATIVE_COMMAND
+import service.LocalExecutionMode.WSL_COMMAND
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import java.util.concurrent.Executors.newSingleThreadScheduledExecutor
@@ -33,59 +39,91 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 private val processLogsWriters = mutableMapOf<String, Future<*>>()
 private val processLogsExecutor = plugin.register(newSingleThreadScheduledExecutor())
 
-fun EnvironmentPlugin.execute(context: String = project.name, vararg command: String) = execute(context, runtimeDirectory, *command)
+enum class LocalExecutionMode {
+    NATIVE_COMMAND,
+    WSL_COMMAND
+}
 
-fun EnvironmentPlugin.execute(context: String = project.name, directory: Path, vararg command: String) {
-    val output = ByteArrayOutputStream()
-    val error = ByteArrayOutputStream()
-    val processResult = ProcessExecutor()
-            .directory(directory.touchDirectory().toFile())
-            .redirectOutput(output)
-            .redirectError(error)
-            .command(*command)
-            .execute()
-    consoleLog(output, error, context)
-    project.run {
-        attention("""Command executed - "${command.joinToString(" ")}" """, context)
-        attention("Directory - $directory", context)
-        attention("Exit value - ${processResult.exitValue}", context)
+class LocalExecutionService(private var trace: Boolean, private var context: String, private val mode: LocalExecutionMode) {
+    fun trace(trace: Boolean = true) {
+        this.trace = trace
+    }
+
+    fun trace(trace: Boolean = true, context: String = this.context) {
+        this.trace = trace
+        this.context = context
+    }
+
+    fun kill(pid: Int) = execute("kill", "-9", pid.toString())
+
+    fun execute(vararg command: String) = execute(plugin.runtimeDirectory, *command)
+
+    fun execute(directory: Path, vararg command: String): ProcessResult {
+        val arguments = when (mode) {
+            NATIVE_COMMAND -> command
+            WSL_COMMAND -> wslCommand(command[0], *command.drop(1).toTypedArray())
+        }
+        val output = ByteArrayOutputStream()
+        val error = ByteArrayOutputStream()
+        val processResult = ProcessExecutor()
+                .directory(directory.touchDirectory().toFile())
+                .redirectOutput(output)
+                .redirectError(error)
+                .command(*arguments)
+                .execute()
+        if (!trace) return processResult
+        plugin.printToConsole(output, error, context)
+        plugin.project.run {
+            attention("""Command executed - "${arguments.joinToString(SPACE)}" """, context)
+            attention("Directory - $directory", context)
+            attention("Exit value - ${processResult.exitValue}", context)
+        }
+        return processResult
+    }
+
+    fun bat(name: String, directory: Path = plugin.runtimeDirectory, script: () -> String) =
+            process(name, directory.resolve(name).bat(), directory, script())
+
+    fun sh(name: String, directory: Path = plugin.runtimeDirectory, script: () -> String) =
+            process(name, directory.resolve(name).sh(), directory, script())
+
+    private fun process(name: String, scriptPath: Path, directory: Path = plugin.runtimeDirectory, script: String): StartedProcess {
+        val processDirectory = directory.resolve(name)
+        runCatching {
+            processLogsWriters.remove(name)?.cancel(true)
+            processDirectory.stdout().clear()
+            processDirectory.stderr().clear()
+        }
+        directory.resolve(scriptPath).writeText(script.trimIndent()).setExecutable()
+        val output = ByteArrayOutputStream()
+        val error = ByteArrayOutputStream()
+        processLogsWriters[name] = processLogsExecutor.scheduleAtFixedRate(
+                { processDirectory.printToFile(output, error) },
+                0,
+                LOG_FILE_REFRESH_PERIOD,
+                MILLISECONDS
+        )
+        val process = ProcessExecutor()
+                .directory(directory.toFile())
+                .redirectOutputAlsoTo(output)
+                .redirectErrorAlsoTo(error)
+                .command(scriptPath.toAbsolutePath().toString())
+                .start()
+        plugin.project.run {
+            attention("Local process started", name)
+            attention("Script - $scriptPath", name)
+            attention("Output - ${processDirectory.stdout()}", name)
+            attention("Error - ${processDirectory.stderr()}", name)
+            line()
+        }
+        return process
     }
 }
 
+fun <T> EnvironmentPlugin.native(trace: Boolean = false, context: String = project.name, service: LocalExecutionService.() -> T) =
+        service(LocalExecutionService(trace, context, NATIVE_COMMAND))
 
-fun EnvironmentPlugin.bat(name: String, directory: Path = runtimeDirectory, script: () -> String) =
-        process(name, directory.resolve(name).bat(), directory, script())
+fun <T> EnvironmentPlugin.wsl(trace: Boolean = false, context: String = project.name, service: LocalExecutionService.() -> T): T =
+        service(LocalExecutionService(trace, context, WSL_COMMAND))
 
-fun EnvironmentPlugin.sh(name: String, directory: Path = runtimeDirectory, script: () -> String) =
-        process(name, directory.resolve(name).sh(), directory, script())
-
-private fun EnvironmentPlugin.process(name: String, scriptPath: Path, directory: Path = runtimeDirectory, script: String) {
-    val processDirectory = directory.resolve(name)
-    runCatching {
-        processLogsWriters.remove(name)?.cancel(true)
-        processDirectory.stdout().clear()
-        processDirectory.stderr().clear()
-    }
-    directory.resolve(scriptPath).writeText(script.trimIndent()).setExecutable()
-    val output = ByteArrayOutputStream()
-    val error = ByteArrayOutputStream()
-    processLogsWriters[name] = processLogsExecutor.scheduleAtFixedRate(
-            { processDirectory.localProcessLog(output, error) },
-            0,
-            LOG_FILE_REFRESH_PERIOD,
-            MILLISECONDS
-    )
-    ProcessExecutor()
-            .directory(directory.toFile())
-            .redirectOutputAlsoTo(output)
-            .redirectErrorAlsoTo(error)
-            .command(scriptPath.toAbsolutePath().toString())
-            .start()
-    project.run {
-        attention("Local process started", name)
-        attention("Script - $scriptPath", name)
-        attention("Output - ${processDirectory.stdout()}", name)
-        attention("Error - ${processDirectory.stderr()}", name)
-        line()
-    }
-}
+fun wslCommand(executable: String, vararg arguments: String) = arrayOf(WSL, "-e", executable, "--", arguments.joinToString(SPACE))
