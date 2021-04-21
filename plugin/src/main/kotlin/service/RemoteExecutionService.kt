@@ -64,8 +64,8 @@ class RemoteExecutionService(private var trace: Boolean, private var context: St
         val result = exec(command)
         val output = ByteArrayOutputStream()
         val error = ByteArrayOutputStream()
-        output.writeBytes(result.inputStream.readBytes())
-        error.writeBytes(result.errorStream.readBytes())
+        output.write(result.inputStream.readBytes())
+        error.write(result.errorStream.readBytes())
         if (!trace) return@session result
         plugin.printToConsole(output, error, context)
         plugin.project.run {
