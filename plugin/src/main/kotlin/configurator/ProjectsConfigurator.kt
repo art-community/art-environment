@@ -69,6 +69,7 @@ private fun EnvironmentPlugin.configureSandbox() {
     directory.touchDirectory()
     directory.resolve(SETTINGS_GRADLE).writeText(SANDBOX_SETTINGS_TEMPLATE)
     directory.resolve(BUILD_GRADLE).writeText(SANDBOX_BUILD_TEMPLATE)
+    directory.resolve(GRADLE_PROPERTIES).writeText(GRADLE_PROPERTIES_TEMPLATE)
     environmentDirectory.parent.resolve(GRADLE).copyRecursive(directory.resolve(GRADLE))
     environmentDirectory.parent.resolve(GRADLEW).copyRecursive(directory.resolve(GRADLEW))
     environmentDirectory.parent.resolve(GRADLEW).copyRecursive(directory.resolve(GRADLEW_BAT))
