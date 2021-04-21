@@ -5,6 +5,7 @@ import constants.AuthenticationMode.KEY
 import constants.AuthenticationMode.PASSWORD
 import constants.LOCALHOST
 import constants.REMOTE_BASE_DIRECTORY
+import java.nio.file.Path
 import javax.inject.Inject
 
 open class RemoteConfiguration @Inject constructor() {
@@ -23,6 +24,9 @@ open class RemoteConfiguration @Inject constructor() {
         private set
 
     lateinit var password: String
+        private set
+
+    var keyLocations: Set<Path> = setOf()
         private set
 
     fun host(host: String) {
@@ -46,6 +50,10 @@ open class RemoteConfiguration @Inject constructor() {
         this.user = user
         this.password = password
         authenticationMode = PASSWORD
+    }
+
+    fun key(path: Path) {
+        this.keyLocations = keyLocations + path
     }
 
     fun directory(directory: String) {

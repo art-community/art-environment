@@ -21,6 +21,7 @@ package service
 import configuration.RemoteConfiguration
 import constants.AuthenticationMode.KEY
 import constants.AuthenticationMode.PASSWORD
+import constants.EMPTY_STRING
 import constants.PROJECTS
 import constants.RUNTIME
 import constants.SSH_TIMEOUT
@@ -39,8 +40,6 @@ import java.nio.file.Files.createDirectories
 import java.nio.file.Path
 
 
-private val touchedDirectories = mutableSetOf<String>()
-
 data class RemoteClient(val configuration: RemoteConfiguration, val sshClient: SSHClient)
 
 fun <T> RemoteConfiguration.ssh(executor: RemoteClient.() -> T): T {
@@ -52,7 +51,10 @@ fun <T> RemoteConfiguration.ssh(executor: RemoteClient.() -> T): T {
             timeout = SSH_TIMEOUT
             when (authenticationMode) {
                 PASSWORD -> authPassword(user, password)
-                KEY -> authPublickey(user)
+                KEY -> when {
+                    keyLocations.isNotEmpty() -> authPublickey(user, *keyLocations.map { location -> location.toAbsolutePath().toString() }.toTypedArray())
+                    else -> authPublickey(user)
+                }
             }
             return executor(RemoteClient(this@ssh, client))
         }
@@ -64,7 +66,18 @@ fun <T> RemoteClient.sftp(executor: SFTPClient.() -> T): T = with(sshClient) { n
 fun <T> RemoteClient.session(executor: Session.() -> T) = with(sshClient) { startSession().use { session -> executor(session) } }
 
 
+fun RemoteClient.context(name: String = EMPTY_STRING) = with(configuration) {
+    when {
+        name.isNotBlank() -> "[$name]: $user@$host${port?.let { port -> ":$port" } ?: ""}"
+        else -> "$user@$host${port?.let { port -> ":$port" } ?: ""}"
+    }
+}
+
 fun RemoteClient.exists(path: String) = execute("test -d $path").exitStatus == 0
+
+fun RemoteClient.kill(pid: Int) = execute("kill -9 $pid")
+
+fun RemoteClient.delete(path: String) = execute("rm -rf $path")
 
 fun RemoteClient.touchDirectory(path: String) = path.apply {
     if (exists(path)) return@apply
@@ -119,7 +132,7 @@ fun RemoteClient.sh(name: String, directory: String, script: String) = session {
     writeExecutable(scriptPath, script)
     val command = """cd $directory && nohup bash $scriptPath 1>$stdoutPath 2>$stdoutPath &""".trimIndent()
     execute(command)
-    val context = "[$name]: ${configuration.user}@${configuration.host}${configuration.port?.let { port -> ":$port" } ?: ""}"
+    val context = context(name)
     plugin.project.run {
         attention("Remote process started", context)
         attention("Script - $scriptPath", context)
@@ -133,17 +146,18 @@ fun RemoteClient.download(remotePath: String, localPath: Path) = sftp { get(remo
 
 fun RemoteClient.readFile(remotePath: String): String = sftp { open(remotePath, setOf(READ)).RemoteFileInputStream().reader().readText() }
 
-fun RemoteClient.writeExecutable(remotePath: String, content: String): Unit =
+fun RemoteClient.writeExecutable(remotePath: String, content: String): String =
         writeFile(remotePath, content, GRP_RWX, USR_RWX)
 
-fun RemoteClient.writeFile(remotePath: String, content: String): Unit =
+fun RemoteClient.writeFile(remotePath: String, content: String): String =
         writeFile(remotePath, content, USR_R, USR_W, GRP_R, GRP_W)
 
-fun RemoteClient.writeFile(remotePath: String, content: String, vararg permissions: FilePermission): Unit = sftp {
+fun RemoteClient.writeFile(remotePath: String, content: String, vararg permissions: FilePermission): String = sftp {
     val modes = setOf(CREAT, WRITE, TRUNC)
     val attributes = FileAttributes.Builder()
             .withPermissions(setOf(*permissions))
             .build()
     touchDirectory(remotePath.parent())
     open(remotePath, modes, attributes).use { file -> file.RemoteFileOutputStream().use { stream -> stream.write(content.toByteArray()) } }
+    remotePath
 }

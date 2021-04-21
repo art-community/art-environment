@@ -122,6 +122,8 @@ fun String.stderr() = "$this$DOT_STDERR"
 
 fun String.lua() = "$this$DOT_LUA"
 
+fun String.pid() = "$this$DOT_PID"
+
 fun String.parent() = substringBeforeLast(SLASH)
 
 fun String.resolve(path: String) = "$this/$path"

@@ -23,25 +23,3 @@ import plugin.EnvironmentPlugin
 import java.nio.file.Path
 
 
-fun EnvironmentPlugin.stopLinuxProcess(name: String, directory: Path) {
-    directory.resolve(name)
-            .pid()
-            .toFile()
-            .takeIf { pid -> pid.exists() }
-            ?.apply {
-                readText().takeIf { pid -> pid.isNotBlank() }
-                        ?.toInt()
-                        ?.let { pid ->
-                            execute(name, "kill", "-9", pid.toString())
-                            project.attention("Linux process killed $pid", name)
-                        }
-                delete()
-            }
-
-}
-
-
-fun EnvironmentPlugin.restartLinuxProcess(name: String, directory: Path, script: () -> String) {
-    stopLinuxProcess(name, directory)
-    sh(name, directory, script)
-}

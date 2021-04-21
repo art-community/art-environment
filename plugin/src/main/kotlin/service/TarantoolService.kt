@@ -56,26 +56,27 @@ private fun EnvironmentPlugin.restartOnLocal(configuration: TarantoolConfigurati
     val scriptPath = directory.resolve(instance.name)
     copyTarantoolModule(directory, instance)
     restartingLog(instance, directory.toString(), executable)
-    restartLinuxProcess(instance.name, directory) { "$executable ${scriptPath.lua().writeText(instance.toLua())}" }
+    restartLinuxLocalProcess(instance.name, directory) { "$executable ${scriptPath.lua().writeText(instance.toLua())}" }
 }
 
 private fun EnvironmentPlugin.stopOnLocal(configuration: TarantoolConfiguration, name: String) =
-        stopLinuxProcess(name, configuration.computeLocalDirectory(name))
+        stopLinuxLocalProcess(name, configuration.computeLocalDirectory(name))
 
 private fun EnvironmentPlugin.restartOnRemote(configuration: TarantoolConfiguration, instance: InstanceConfiguration) {
     val executable = configuration.executionConfiguration.executable ?: TARANTOOL
     val directory = configuration.computeRemoteDirectory(instance.name)
     val scriptPath = directory.resolve(instance.name).lua()
-//    copyTarantoolModule(directory, instance)
     restartingLog(instance, directory, executable)
     extension.remoteConfiguration.ssh {
         writeFile(scriptPath, instance.toLua())
-        sh(instance.name, directory) {"$executable $scriptPath"}
+        restartLinuxRemoteProcess(instance.name, directory) { "$executable ${writeFile(scriptPath.lua(), instance.toLua())}" }
     }
 }
 
-private fun EnvironmentPlugin.stopOnRemote(configuration: TarantoolConfiguration, name: String) =
-        stopLinuxProcess(name, configuration.computeLocalDirectory(name))
+private fun EnvironmentPlugin.stopOnRemote(configuration: TarantoolConfiguration, name: String) = extension.remoteConfiguration.ssh {
+    stopLinuxRemoteProcess(name, configuration.computeRemoteDirectory(name))
+}
+
 
 private fun EnvironmentPlugin.restartOnWsl(configuration: TarantoolConfiguration, instance: InstanceConfiguration) {
     val executable = configuration.executionConfiguration.executable ?: TARANTOOL
