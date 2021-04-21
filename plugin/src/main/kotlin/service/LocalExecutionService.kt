@@ -18,9 +18,7 @@
 
 package service
 
-import constants.LOG_FILE_REFRESH_PERIOD
-import constants.SPACE
-import constants.WSL
+import constants.*
 import logger.attention
 import logger.line
 import org.zeroturnaround.exec.ProcessExecutor
@@ -53,8 +51,6 @@ class LocalExecutionService(private var trace: Boolean, private var context: Str
         this.trace = trace
         this.context = context
     }
-
-    fun kill(pid: Int) = execute("kill", "-9", pid.toString())
 
     fun execute(vararg command: String) = execute(plugin.runtimeDirectory, *command)
 
@@ -125,7 +121,7 @@ class LocalExecutionService(private var trace: Boolean, private var context: Str
                         .directory(directory.toFile())
                         .redirectOutputAlsoTo(output)
                         .redirectErrorAlsoTo(error)
-                        .command(WSL, "-e", "bash", "--", scriptPath.toWsl())
+                        .command(WSL, E_ARGUMENT, BASH, PASS_ARGUMENTS, scriptPath.toWsl())
                         .start()
                 plugin.project.run {
                     attention("WSL process started", name)
@@ -140,10 +136,14 @@ class LocalExecutionService(private var trace: Boolean, private var context: Str
     }
 }
 
-fun <T> EnvironmentPlugin.native(trace: Boolean = false, context: String = project.name, service: LocalExecutionService.() -> T) =
+fun <T> EnvironmentPlugin.native(trace: Boolean = project.logger.isTraceEnabled, context: String = project.name, service: LocalExecutionService.() -> T) =
         service(LocalExecutionService(trace, context, NATIVE_COMMAND))
 
-fun <T> EnvironmentPlugin.wsl(trace: Boolean = false, context: String = project.name, service: LocalExecutionService.() -> T): T =
+fun <T> EnvironmentPlugin.wsl(trace: Boolean = project.logger.isTraceEnabled, context: String = project.name, service: LocalExecutionService.() -> T): T =
         service(LocalExecutionService(trace, context, WSL_COMMAND))
 
-fun wslCommand(executable: String, vararg arguments: String) = if (arguments.isEmpty()) arrayOf(WSL, "-e", executable) else arrayOf(WSL, "-e", executable, "--", arguments.joinToString(SPACE))
+fun wslCommand(executable: String, vararg arguments: String) =
+        when {
+            arguments.isEmpty() -> arrayOf(WSL, E_ARGUMENT, executable)
+            else -> arrayOf(WSL, E_ARGUMENT, executable, PASS_ARGUMENTS, arguments.joinToString(SPACE))
+        }

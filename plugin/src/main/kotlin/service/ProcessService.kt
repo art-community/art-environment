@@ -18,6 +18,8 @@
 
 package service
 
+import constants.KILL
+import constants.TERMINATE_SIGNAL
 import logger.attention
 import plugin.EnvironmentPlugin
 import plugin.plugin
@@ -32,7 +34,7 @@ fun EnvironmentPlugin.stopWslProcess(name: String, directory: Path) {
                 readText().takeIf { pid -> pid.isNotBlank() }
                         ?.toInt()
                         ?.let { pid ->
-                            wsl { kill(pid) }
+                            wsl { execute(KILL, TERMINATE_SIGNAL, pid.toString()) }
                             project.attention("WSL process killed $pid", name)
                         }
                 delete()
@@ -48,7 +50,7 @@ fun EnvironmentPlugin.stopLinuxLocalProcess(name: String, directory: Path) {
                 readText().takeIf { pid -> pid.isNotBlank() }
                         ?.toInt()
                         ?.let { pid ->
-                            native { kill(pid) }
+                            native { execute(KILL, TERMINATE_SIGNAL, pid.toString()) }
                             project.attention("Linux process killed $pid", name)
                         }
                 delete()
