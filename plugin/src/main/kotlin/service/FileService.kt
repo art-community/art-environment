@@ -22,8 +22,12 @@ import constants.*
 import plugin.EnvironmentPlugin
 import java.io.File
 import java.nio.charset.Charset.defaultCharset
+import java.nio.file.Files
+import java.nio.file.Files.*
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import java.nio.file.StandardCopyOption.*
 
 val EnvironmentPlugin.environmentDirectory: Path
     get() = project.projectDir.toPath()
@@ -85,6 +89,11 @@ fun Path.appendText(text: String): Path {
 fun Path.setExecutable() = apply { toFile().setExecutable(true) }
 
 fun Path.clear() = toFile().takeIf(File::exists)?.writeText(EMPTY_STRING)
+
+fun Path.copyTo(other: Path) {
+    if (other.toFile().exists()) return
+    copy(this, other, REPLACE_EXISTING, COPY_ATTRIBUTES)
+}
 
 fun Path.deleteRecursive(): Boolean = toFile().deleteRecursive()
 

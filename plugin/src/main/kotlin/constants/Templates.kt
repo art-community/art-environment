@@ -25,3 +25,5 @@ val PUBLISHING_PROPERTIES_TEMPLATE = { username: String, password: String ->
 }
 
 val LOG_TEMPLATE = { context: String, line: String -> "($context): $line" }
+
+const val SANDBOX_SETTINGS_TEMPLATE = """rootProject.name = "sandbox""""

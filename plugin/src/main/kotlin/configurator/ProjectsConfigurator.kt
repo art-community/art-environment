@@ -30,12 +30,8 @@ import org.eclipse.jgit.lib.BranchConfig.BranchRebaseMode.REBASE
 import org.eclipse.jgit.lib.SubmoduleConfig.FetchRecurseSubmodulesMode.YES
 import org.eclipse.jgit.merge.MergeStrategy.THEIRS
 import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
-import org.gradle.api.file.DuplicatesStrategy.INCLUDE
 import plugin.EnvironmentPlugin
 import service.*
-import java.nio.file.Files.copy
-import java.nio.file.StandardCopyOption.COPY_ATTRIBUTES
-import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 fun EnvironmentPlugin.configureProjects() = extension.apply {
     val settings = buildString {
@@ -52,17 +48,26 @@ fun EnvironmentPlugin.configureProjects() = extension.apply {
                 EXAMPLE -> configureProject(exampleConfiguration)
             }
         }
+        if (projects.contains(SANDBOX)) configureSandbox()
     }
     val buildTemplate = buildString { append(PROJECTS_GRADLE_BUILD_TEMPLATE) }
     projectsDirectory.resolve(SETTINGS_GRADLE).writeText(settings)
     projectsDirectory.resolve(BUILD_GRADLE).writeText(buildTemplate)
-    project.copy {
-        from(environmentDirectory.resolve(GRADLE))
-        into(projectDirectory(GRADLE_PLUGIN))
-        duplicatesStrategy = INCLUDE
-    }
-    copy(environmentDirectory.parent.resolve(GRADLEW), projectsDirectory.resolve(GRADLEW), REPLACE_EXISTING, COPY_ATTRIBUTES)
-    copy(environmentDirectory.parent.resolve(GRADLEW_BAT), projectsDirectory.resolve(GRADLEW_BAT), REPLACE_EXISTING, COPY_ATTRIBUTES)
+    environmentDirectory.parent.resolve(GRADLE).copyTo(projectDirectory(GRADLE_PLUGIN).resolve(GRADLE))
+    environmentDirectory.parent.resolve(GRADLEW).copyTo(projectsDirectory.resolve(GRADLEW))
+    environmentDirectory.parent.resolve(GRADLEW).copyTo(projectsDirectory.resolve(GRADLEW_BAT))
+}
+
+
+private fun EnvironmentPlugin.configureSandbox() {
+    val directory = projectsDirectory.resolve(SANDBOX)
+    if (directory.toFile().exists()) return
+    directory.touchDirectory()
+    directory.resolve(SETTINGS_GRADLE).writeText(SANDBOX_SETTINGS_TEMPLATE)
+    directory.resolve(BUILD_GRADLE).writeText(PROJECTS_GRADLE_BUILD_TEMPLATE)
+    environmentDirectory.parent.resolve(GRADLE).copyTo(directory.resolve(GRADLE))
+    environmentDirectory.parent.resolve(GRADLEW).copyTo(directory.resolve(GRADLEW))
+    environmentDirectory.parent.resolve(GRADLEW).copyTo(directory.resolve(GRADLEW_BAT))
 }
 
 private fun EnvironmentPlugin.configureProject(configuration: ProjectConfiguration) = configuration.run {

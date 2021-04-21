@@ -18,7 +18,10 @@
 
 package extension
 
-import configuration.*
+import configuration.ProjectConfiguration
+import configuration.PublishingConfiguration
+import configuration.RemoteConfiguration
+import configuration.TarantoolConfiguration
 import constants.*
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -88,5 +91,9 @@ open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val pr
 
     fun remote(configurator: Action<in RemoteConfiguration> = EMPTY_ACTION) {
         configurator.execute(remoteConfiguration)
+    }
+
+    fun sandbox() {
+        projects += SANDBOX
     }
 }
