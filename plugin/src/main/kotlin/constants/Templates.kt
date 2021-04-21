@@ -28,11 +28,12 @@ val LOG_TEMPLATE = { context: String, line: String -> "($context): $line" }
 
 const val SANDBOX_SETTINGS_TEMPLATE = """rootProject.name = "sandbox""""
 
-val SANDBOX_BUILD_TEMPLATE =
-        """
-        repositories {
-            mavenCentral()
-        }
-        
-        $PROJECTS_GRADLE_BUILD_TEMPLATE
-        """.trimIndent()
+val SANDBOX_BUILD_TEMPLATE = """
+    repositories {
+        mavenCentral()
+    }
+    
+    tasks.withType(type = Wrapper::class) {
+        gradleVersion = "7.0"
+    }        
+    """.trimIndent()
