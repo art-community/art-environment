@@ -28,14 +28,15 @@ import logger.attention
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.sftp.FileAttributes
-import net.schmizz.sshj.sftp.OpenMode.*
+import net.schmizz.sshj.sftp.OpenMode.READ
 import net.schmizz.sshj.sftp.SFTPClient
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier
 import net.schmizz.sshj.xfer.FilePermission
 import net.schmizz.sshj.xfer.FilePermission.*
+import net.schmizz.sshj.xfer.FileSystemFile
 import plugin.plugin
 import java.io.ByteArrayOutputStream
-import java.nio.file.Files.createDirectories
+import java.nio.file.Files.createTempFile
 import java.nio.file.Path
 
 data class RemoteClient(val ssh: SSHClient, val configuration: RemoteConfiguration)
@@ -130,9 +131,11 @@ class RemoteExecutionService(private var trace: Boolean, private var context: St
     }
 
     fun upload(localPath: Path, remotePath: String) = sftp { put(localPath.toAbsolutePath().toString(), remotePath) }
-    fun download(remotePath: String, localPath: Path) = sftp { get(remotePath, createDirectories(localPath).toString()) }
+    fun download(remotePath: String, localPath: Path) = sftp { get(remotePath, localPath.apply { parent.touchDirectory() }.toString()) }
 
-    fun readFile(remotePath: String): String = sftp { open(remotePath, setOf(READ)).RemoteFileInputStream().reader().readText() }
+    fun readFile(remotePath: String): String = sftp {
+        open(remotePath, setOf(READ)).RemoteFileInputStream().reader().readText()
+    }
 
     fun writeExecutable(remotePath: String, content: String): String =
             writeFile(remotePath, content, GRP_RWX, USR_RWX)
@@ -141,13 +144,13 @@ class RemoteExecutionService(private var trace: Boolean, private var context: St
             writeFile(remotePath, content, USR_R, USR_W, GRP_R, GRP_W)
 
     fun writeFile(remotePath: String, content: String, vararg permissions: FilePermission): String = sftp {
-        val modes = setOf(CREAT, WRITE, TRUNC)
         val attributes = FileAttributes.Builder().withPermissions(setOf(*permissions)).build()
         touchDirectory(remotePath.parent())
-        open(remotePath, modes, attributes).use { file ->
-            file.RemoteFileOutputStream().use { stream ->
-                stream.write(content.toByteArray())
-            }
+        createTempFile(EMPTY_STRING, EMPTY_STRING).apply {
+            writeText(content)
+            put(FileSystemFile(toFile()), remotePath)
+            setattr(remotePath, attributes)
+            toFile().delete()
         }
         remotePath
     }
