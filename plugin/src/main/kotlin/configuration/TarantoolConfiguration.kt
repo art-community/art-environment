@@ -19,6 +19,7 @@
 package configuration
 
 import constants.*
+import constants.ExecutionMode.*
 import org.gradle.api.Action
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
@@ -29,24 +30,24 @@ import javax.inject.Inject
 open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFactory) : ProjectConfiguration(TARANTOOL) {
     val instances: NamedDomainObjectContainer<InstanceConfiguration> = objectFactory.domainObjectContainer(InstanceConfiguration::class.java)
     val executionConfiguration: ExecutionConfiguration = objectFactory.newInstance()
-    lateinit var executionMode: ExecutionMode
+    var executionMode: ExecutionMode = LOCAL_EXECUTION
         private set
 
     fun wsl(configurator: Action<in ExecutionConfiguration> = EMPTY_ACTION) {
         if (!isWindows) throw wslNotAvailableException()
         configurator.execute(executionConfiguration)
-        executionMode = ExecutionMode.WSL_EXECUTION
+        executionMode = WSL_EXECUTION
     }
 
     fun local(configurator: Action<in ExecutionConfiguration> = EMPTY_ACTION) {
         if (isWindows) throw localNotAvailableException("Tarantool is not supported on Windows. ")
         configurator.execute(executionConfiguration)
-        executionMode = ExecutionMode.LOCAL_EXECUTION
+        executionMode = LOCAL_EXECUTION
     }
 
     fun remote(configurator: Action<in ExecutionConfiguration> = EMPTY_ACTION) {
         configurator.execute(executionConfiguration)
-        executionMode = ExecutionMode.REMOTE_EXECUTION
+        executionMode = REMOTE_EXECUTION
     }
 
     fun instance(name: String, configurator: Action<in InstanceConfiguration>) {
