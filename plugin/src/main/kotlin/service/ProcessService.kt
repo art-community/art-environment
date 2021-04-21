@@ -68,7 +68,7 @@ fun RemoteClient.stopLinuxRemoteProcess(name: String, directory: String) {
                             ?.toInt()
                             ?.let { pid ->
                                 kill(pid)
-                                plugin.project.attention("Linux process killed $pid", context())
+                                plugin.project.attention("Remote process killed $pid", context())
                             }
                     delete(this)
 
@@ -79,15 +79,15 @@ fun RemoteClient.stopLinuxRemoteProcess(name: String, directory: String) {
 
 fun EnvironmentPlugin.restartWslProcess(name: String, directory: Path, script: () -> String) {
     stopWslProcess(name, directory)
-    wsl { sh(name, directory, script) }
+    wsl(context = name) { sh(name, directory, script) }
 }
 
 fun EnvironmentPlugin.restartLinuxLocalProcess(name: String, directory: Path, script: () -> String) {
     stopLinuxLocalProcess(name, directory)
-    native { sh(name, directory, script) }
+    native(context = name) { sh(name, directory, script) }
 }
 
 fun RemoteClient.restartLinuxRemoteProcess(name: String, directory: String, script: () -> String) {
     stopLinuxRemoteProcess(name, directory)
-    remote { sh(name, directory, script) }
+    remote(context = name) { sh(name, directory, script) }
 }

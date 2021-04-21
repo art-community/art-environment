@@ -86,6 +86,23 @@ fun Path.setExecutable() = apply { toFile().setExecutable(true) }
 
 fun Path.clear() = toFile().takeIf(File::exists)?.writeText(EMPTY_STRING)
 
+fun Path.deleteRecursive(): Boolean = toFile().deleteRecursive()
+
+fun File.deleteRecursive(): Boolean {
+    if (!exists()) {
+        return true
+    }
+    if (isFile) {
+        return delete()
+    }
+    val children = listFiles()
+    if (children.isNullOrEmpty()) {
+        return delete()
+    }
+    children.forEach(File::deleteRecursive)
+    return delete()
+}
+
 
 fun Path.toWsl(): String {
     var path = this.toAbsolutePath().toString()

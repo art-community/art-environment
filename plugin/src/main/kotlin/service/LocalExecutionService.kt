@@ -108,10 +108,10 @@ class LocalExecutionService(private var trace: Boolean, private var context: Str
                         .command(scriptPath.toAbsolutePath().toString())
                         .start()
                 plugin.project.run {
-                    attention("Local process started", name)
-                    attention("Script - $scriptPath", name)
-                    attention("Output - ${processDirectory.stdout()}", name)
-                    attention("Error - ${processDirectory.stderr()}", name)
+                    attention("Local process started", context)
+                    attention("Script - $scriptPath", context)
+                    attention("Output - ${processDirectory.stdout()}", context)
+                    attention("Error - ${processDirectory.stderr()}", context)
                     line()
                     return process
                 }
@@ -142,8 +142,7 @@ fun <T> EnvironmentPlugin.native(trace: Boolean = project.logger.isTraceEnabled,
 fun <T> EnvironmentPlugin.wsl(trace: Boolean = project.logger.isTraceEnabled, context: String = project.name, service: LocalExecutionService.() -> T): T =
         service(LocalExecutionService(trace, context, WSL_COMMAND))
 
-fun wslCommand(executable: String, vararg arguments: String) =
-        when {
-            arguments.isEmpty() -> arrayOf(WSL, E_ARGUMENT, executable)
-            else -> arrayOf(WSL, E_ARGUMENT, executable, PASS_ARGUMENTS) + arguments
-        }
+fun wslCommand(executable: String, vararg arguments: String) = when {
+    arguments.isEmpty() -> arrayOf(WSL, E_ARGUMENT, executable)
+    else -> arrayOf(WSL, E_ARGUMENT, executable, PASS_ARGUMENTS) + arguments
+}

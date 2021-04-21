@@ -54,6 +54,7 @@ open class RemoteConfiguration @Inject constructor() {
 
     fun key(path: Path) {
         this.keyLocations = keyLocations + path
+        authenticationMode = KEY
     }
 
     fun directory(directory: String) {

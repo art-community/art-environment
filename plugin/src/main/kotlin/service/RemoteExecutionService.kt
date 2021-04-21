@@ -51,6 +51,7 @@ class RemoteExecutionService(private var trace: Boolean, private var context: St
 
     fun context() = context
 
+    fun context(additional: String) = "[$additional]: $context"
 
     fun <T> sftp(executor: SFTPClient.() -> T): T = with(client.ssh) { newSFTPClient().use { client -> executor(client) } }
 
@@ -149,6 +150,7 @@ fun <T> RemoteConfiguration.ssh(executor: RemoteClient.() -> T): T {
         with(client) {
             addHostKeyVerifier(PromiscuousVerifier())
             addAlgorithmsVerifier { true }
+            loadKnownHosts()
             port?.let { sshPort -> connect(host, sshPort) } ?: connect(host)
             timeout = SSH_TIMEOUT
             when (authenticationMode) {
