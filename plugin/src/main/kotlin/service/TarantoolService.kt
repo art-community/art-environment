@@ -25,7 +25,10 @@ import constants.ExecutionMode.*
 import logger.attention
 import plugin.EnvironmentPlugin
 import plugin.plugin
+import java.nio.file.Files.copy
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption.COPY_ATTRIBUTES
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 fun EnvironmentPlugin.restartTarantool() = extension.tarantoolConfiguration.run {
     if (instances.any { instance -> instance.includeModule }) {
@@ -102,20 +105,16 @@ private fun EnvironmentPlugin.stopOnRemote(configuration: TarantoolConfiguration
 
 
 private fun EnvironmentPlugin.localCopyTarantoolModule(directory: Path, instance: InstanceConfiguration) {
-    project.run {
-        directory.resolve(ART_TARANTOOL_LUA).toFile().delete()
-        if (!instance.includeModule) {
-            return
-        }
-        copy {
-            projectDirectory(TARANTOOL)
-                    .resolve(BUILD)
-                    .resolve(DESTINATION)
-                    .resolve(ART_TARANTOOL_LUA)
-                    .takeIf { lua -> lua.toFile().exists() }
-                    ?.let { lua -> from(lua); into(directory) }
-        }
+    val destination = directory.resolve(ART_TARANTOOL_LUA).apply { toFile().delete() }
+    if (!instance.includeModule) {
+        return
     }
+    projectDirectory(TARANTOOL)
+            .resolve(BUILD)
+            .resolve(DESTINATION)
+            .resolve(ART_TARANTOOL_LUA)
+            .takeIf { lua -> lua.toFile().exists() }
+            ?.let { lua -> copy(lua, destination, COPY_ATTRIBUTES, REPLACE_EXISTING) }
 }
 
 private fun RemoteExecutionService.remoteCopyTarantoolModule(directory: String, instance: InstanceConfiguration) {

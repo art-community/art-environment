@@ -46,6 +46,12 @@ fun Path.touchDirectory(): Path {
     return this
 }
 
+fun Path.touchFile(): Path {
+    if (toFile().exists()) return this
+    parent.touchDirectory()
+    return writeText(EMPTY_STRING)
+}
+
 fun Path.writeText(text: String): Path {
     val asFile = parent.toFile()
     if (asFile.exists()) {

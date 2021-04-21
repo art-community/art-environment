@@ -33,9 +33,9 @@ val isSunos: Boolean
 
 const val WSL = "wsl"
 const val E_ARGUMENT = "-e"
-const val C_ARGUMENT = "-e"
+const val C_ARGUMENT = "-c"
 const val PASS_ARGUMENTS = "--"
-const val BASH = "bas"
+const val BASH = "bash"
 const val KILL = "kill"
 const val TERMINATE_SIGNAL = "-9"
 const val MKDIR = "mkdir"

@@ -121,7 +121,7 @@ class LocalExecutionService(private var trace: Boolean, private var context: Str
                         .directory(directory.toFile())
                         .redirectOutputAlsoTo(output)
                         .redirectErrorAlsoTo(error)
-                        .command(WSL, E_ARGUMENT, BASH, PASS_ARGUMENTS, scriptPath.toWsl())
+                        .command(WSL, BASH, scriptPath.toWsl())
                         .start()
                 plugin.project.run {
                     attention("WSL process started", name)
@@ -144,6 +144,6 @@ fun <T> EnvironmentPlugin.wsl(trace: Boolean = project.logger.isTraceEnabled, co
 
 fun wslCommand(executable: String, vararg arguments: String) =
         when {
-            arguments.isEmpty() -> arrayOf(WSL, E_ARGUMENT, executable)
-            else -> arrayOf(WSL, E_ARGUMENT, executable, PASS_ARGUMENTS, arguments.joinToString(SPACE))
+            arguments.isEmpty() -> arrayOf(WSL, BASH, executable)
+            else -> arrayOf(WSL, E_ARGUMENT, executable, PASS_ARGUMENTS) + arguments
         }
