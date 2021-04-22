@@ -132,7 +132,7 @@ private fun EnvironmentPlugin.localCopyTarantoolModule(directory: Path, instance
             .resolve(DESTINATION)
             .resolve(ART_TARANTOOL_LUA)
             .takeIf { lua -> lua.toFile().exists() }
-            ?.let { lua -> copy(lua, destination, COPY_ATTRIBUTES, REPLACE_EXISTING) }
+            ?.let { lua -> copy(lua, destination.touchFile(), COPY_ATTRIBUTES, REPLACE_EXISTING) }
 }
 
 private fun RemoteExecutionService.remoteCopyTarantoolModule(directory: String, instance: InstanceConfiguration) {
