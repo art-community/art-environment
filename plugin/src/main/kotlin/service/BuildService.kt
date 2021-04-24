@@ -21,12 +21,13 @@ package service
 import constants.GRADLEW
 import constants.GRADLEW_BAT
 import constants.isWindows
-import logger.line
 import plugin.EnvironmentPlugin
 
 fun EnvironmentPlugin.runGradleTasks(projectName: String, vararg tasks: String) {
     val executable = projectsDirectory.resolve(if (isWindows) GRADLEW_BAT else GRADLEW).setExecutable().toFile().absoluteFile.toString()
     val command = arrayOf(executable) + tasks.map { task -> ":$projectName:$task" }
-    native(context = project.name) { execute(projectsDirectory, *command) }
-    project.line()
+    native(context = project.name) {
+        trace()
+        execute(projectsDirectory, *command)
+    }
 }
