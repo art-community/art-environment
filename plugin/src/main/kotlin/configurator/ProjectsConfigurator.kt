@@ -56,7 +56,7 @@ fun EnvironmentPlugin.configureProjects() = extension.apply {
     projectsDirectory.resolve(BUILD_GRADLE).writeText(buildTemplate)
     environmentDirectory.parent.resolve(GRADLE).copyRecursive(projectDirectory(GRADLE_PLUGIN).resolve(GRADLE))
     environmentDirectory.parent.resolve(GRADLEW).copyRecursive(projectsDirectory.resolve(GRADLEW))
-    environmentDirectory.parent.resolve(GRADLEW).copyRecursive(projectsDirectory.resolve(GRADLEW_BAT))
+    environmentDirectory.parent.resolve(GRADLEW_BAT).copyRecursive(projectsDirectory.resolve(GRADLEW_BAT))
 }
 
 
@@ -72,7 +72,7 @@ private fun EnvironmentPlugin.configureSandbox() {
     directory.resolve(GRADLE_PROPERTIES).writeText(GRADLE_PROPERTIES_TEMPLATE)
     environmentDirectory.parent.resolve(GRADLE).copyRecursive(directory.resolve(GRADLE))
     environmentDirectory.parent.resolve(GRADLEW).copyRecursive(directory.resolve(GRADLEW))
-    environmentDirectory.parent.resolve(GRADLEW).copyRecursive(directory.resolve(GRADLEW_BAT))
+    environmentDirectory.parent.resolve(GRADLEW_BAT).copyRecursive(directory.resolve(GRADLEW_BAT))
     project.attention("Sandbox configured: $directory")
 }
 
