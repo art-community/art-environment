@@ -23,10 +23,8 @@ import configuration.TarantoolConfiguration.InstanceConfiguration
 import constants.*
 import constants.ExecutionMode.*
 import logger.attention
-import org.codehaus.groovy.tools.FileSystemCompiler.deleteRecursive
 import plugin.EnvironmentPlugin
 import plugin.plugin
-import java.nio.file.Files
 import java.nio.file.Files.copy
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption.COPY_ATTRIBUTES
@@ -149,13 +147,17 @@ private fun RemoteExecutionService.remoteCopyTarantoolModule(directory: String, 
 }
 
 
-private fun TarantoolConfiguration.computeLocalDirectory(name: String): Path = executionConfiguration.localDirectory()
-        .resolve(TARANTOOL)
-        .resolve(name)
+private fun TarantoolConfiguration.computeLocalDirectory(name: String): Path {
+    val directory = executionConfiguration.localDirectory()?.touchDirectory() ?: plugin.runtimeDirectory
+    return directory.resolve(TARANTOOL).resolve(name)
+}
 
-private fun TarantoolConfiguration.computeRemoteDirectory(name: String): String = executionConfiguration.remoteDirectory()
-        .resolve(TARANTOOL)
-        .resolve(name)
+private fun TarantoolConfiguration.computeRemoteDirectory(name: String): String {
+    val directory = executionConfiguration
+            .remoteDirectory()
+            ?: plugin.extension.remoteConfiguration.ssh { remote { runtimeDirectory() } }
+    return directory.resolve(TARANTOOL).resolve(name)
+}
 
 
 private fun EnvironmentPlugin.printLocalRestartingLog(instance: InstanceConfiguration, directory: String, executable: String) = project.run {

@@ -1,9 +1,7 @@
 package configuration
 
 import plugin.plugin
-import service.remote
 import service.runtimeDirectory
-import service.ssh
 import service.touchDirectory
 import java.nio.file.Path
 import javax.inject.Inject
@@ -28,8 +26,7 @@ open class ExecutionConfiguration @Inject constructor() {
         this.remoteDirectory = directory
     }
 
-    fun localDirectory() = localDirectory?.touchDirectory() ?: plugin.runtimeDirectory
+    fun localDirectory() = localDirectory
 
     fun remoteDirectory() = remoteDirectory
-            ?: plugin.extension.remoteConfiguration.ssh { remote { runtimeDirectory() } }
 }

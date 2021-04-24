@@ -26,7 +26,7 @@ tasks.create("prepareLocalEnvironment") {
         copy {
             from("global")
             into("local")
-            exclude("runtime")
+            include("build.gradle.kts")
         }
     }
 }

@@ -40,7 +40,7 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
     }
 
     fun local(configurator: Action<in ExecutionConfiguration> = EMPTY_ACTION) {
-        if (isWindows) throw localNotAvailableException("Tarantool is not supported on Windows. ")
+        if (isWindows) throw localNotAvailableException("Tarantool is not supported on Windows")
         configurator.execute(executionConfiguration)
         executionMode = LOCAL_EXECUTION
     }
