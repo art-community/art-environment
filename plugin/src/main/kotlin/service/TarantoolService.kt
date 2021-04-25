@@ -114,7 +114,7 @@ private fun EnvironmentPlugin.stopOnRemote(configuration: TarantoolConfiguration
 
 
 private fun EnvironmentPlugin.cleanOnRemote(configuration: TarantoolConfiguration, name: String) = extension.remoteConfiguration.ssh {
-    remote { configuration.computeRemoteDirectory(name) }
+    remote { delete(configuration.computeRemoteDirectory(name)) }
 }
 
 private fun EnvironmentPlugin.cleanOnLocal(configuration: TarantoolConfiguration, name: String) = configuration.computeLocalDirectory(name).deleteRecursive()
