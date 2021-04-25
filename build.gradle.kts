@@ -26,7 +26,8 @@ tasks.create("prepareLocalEnvironment") {
         copy {
             from("global")
             into("local")
-            include("build.gradle.kts")
+            include("global.gradle.kts")
+            rename("global.gradle.kts", "local.gradle.kts")
         }
     }
 }

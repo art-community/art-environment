@@ -21,6 +21,6 @@ rootProject.name = "art-environment"
 includeBuild("plugin")
 
 when (file("local").exists()) {
-    true -> include("local")
-    false -> include("global")
+    true -> include("local").apply { project(":local").buildFileName = "local.gradle.kts" }
+    false -> include("global").apply { project(":global").buildFileName = "global.gradle.kts" }
 }
