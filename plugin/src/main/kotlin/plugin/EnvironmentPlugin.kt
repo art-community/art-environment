@@ -19,8 +19,8 @@
 package plugin
 
 import configurator.configureTasks
-import constants.*
-import extension.ArtExtension
+import constants.ART
+import extension.EnvironmentExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
@@ -33,17 +33,19 @@ lateinit var plugin: EnvironmentPlugin
 class EnvironmentPlugin : Plugin<Project> {
     lateinit var project: Project
         private set
-    lateinit var extension: ArtExtension
+    lateinit var extension: EnvironmentExtension
         private set
     private val executors = mutableListOf<ExecutorService>()
 
-    fun <T: ExecutorService>  register(executorService: T): T = executorService.apply { executors += this }
+    fun <T : ExecutorService> register(executorService: T): T = executorService.apply { executors += this }
 
-    override fun apply(project: Project): Unit = project.run {
-        this@EnvironmentPlugin.project = this
-        extension = extensions.create(ART, this)
-        plugin = this@EnvironmentPlugin
-        addShutdownHook { executors.forEach(ExecutorService::shutdownNow) }
-        configureTasks()
+    override fun apply(target: Project) {
+        plugin = this
+        project = target
+        extension = target.extensions.create(ART)
+        target.runCatching {
+            addShutdownHook { executors.forEach(ExecutorService::shutdownNow) }
+            configureTasks()
+        }.onFailure { error -> target.logger.error(error.message, error) }
     }
 }

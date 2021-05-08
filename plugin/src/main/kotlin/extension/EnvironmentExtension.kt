@@ -24,12 +24,11 @@ import configuration.RemoteConfiguration
 import configuration.TarantoolConfiguration
 import constants.*
 import org.gradle.api.Action
-import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
-open class ArtExtension @Inject constructor(objectFactory: ObjectFactory, val project: Project) {
+open class EnvironmentExtension @Inject constructor(objectFactory: ObjectFactory) {
     val projects = mutableSetOf<String>()
 
     var defaultUrl: String = DEFAULT_URL
