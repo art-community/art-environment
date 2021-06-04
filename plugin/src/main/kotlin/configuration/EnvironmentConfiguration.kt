@@ -16,19 +16,15 @@
  * limitations under the License.
  */
 
-package extension
+package configuration
 
-import configuration.ProjectConfiguration
-import configuration.PublishingConfiguration
-import configuration.RemoteConfiguration
-import configuration.TarantoolConfiguration
 import constants.*
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.kotlin.dsl.newInstance
 import javax.inject.Inject
 
-open class EnvironmentExtension @Inject constructor(objectFactory: ObjectFactory) {
+open class EnvironmentConfiguration @Inject constructor(objectFactory: ObjectFactory) {
     val projects = mutableSetOf<String>()
 
     var defaultUrl: String = DEFAULT_URL
@@ -51,7 +47,7 @@ open class EnvironmentExtension @Inject constructor(objectFactory: ObjectFactory
     val remoteConfiguration: RemoteConfiguration = objectFactory.newInstance()
 
     fun url(url: String) {
-        this.defaultUrl = url
+        defaultUrl = url
     }
 
     fun java(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {

@@ -107,7 +107,7 @@ class RemoteExecutionService(private var trace: Boolean, private var context: St
 
     fun touchFile(path: String) = path.apply { execute("$TOUCH $this") }
 
-    fun runtimeDirectory() = touchDirectory("${plugin.extension.remoteConfiguration.directory()}/$RUNTIME")
+    fun runtimeDirectory() = touchDirectory("${plugin.configuration.remoteConfiguration.directory()}/$RUNTIME")
 
     fun directoryExists(path: String) = execute("$TEST $D_ARGUMENT $path").exitStatus == 0
 

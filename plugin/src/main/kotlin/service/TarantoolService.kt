@@ -30,7 +30,7 @@ import java.nio.file.Path
 import java.nio.file.StandardCopyOption.COPY_ATTRIBUTES
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
-fun EnvironmentPlugin.restartTarantool() = extension.tarantoolConfiguration.run {
+fun EnvironmentPlugin.restartTarantool() = configuration.tarantoolConfiguration.run {
     if (instances.any { instance -> instance.includeModule }) {
         project.run { runGradleTasks(projectName(TARANTOOL), CLEAN, BUILD) }
     }
@@ -43,7 +43,7 @@ fun EnvironmentPlugin.restartTarantool() = extension.tarantoolConfiguration.run 
     }
 }
 
-fun EnvironmentPlugin.stopTarantool() = extension.tarantoolConfiguration.run {
+fun EnvironmentPlugin.stopTarantool() = configuration.tarantoolConfiguration.run {
     instances.forEach { instance ->
         when (executionMode) {
             LOCAL_EXECUTION -> stopOnLocal(this, instance.name)
@@ -53,7 +53,7 @@ fun EnvironmentPlugin.stopTarantool() = extension.tarantoolConfiguration.run {
     }
 }
 
-fun EnvironmentPlugin.cleanTarantool() = extension.tarantoolConfiguration.run {
+fun EnvironmentPlugin.cleanTarantool() = configuration.tarantoolConfiguration.run {
     instances.forEach { instance ->
         when (executionMode) {
             LOCAL_EXECUTION, WSL_EXECUTION -> cleanOnLocal(this, instance.name)
@@ -97,7 +97,7 @@ private fun EnvironmentPlugin.restartOnRemote(configuration: TarantoolConfigurat
     val executable = configuration.executionConfiguration.executable ?: TARANTOOL
     val directory = configuration.computeRemoteDirectory(instance.name)
     val scriptPath = directory.resolve(instance.name).lua()
-    extension.remoteConfiguration.ssh {
+    this.configuration.remoteConfiguration.ssh {
         remote {
             printRemoteRestartingLog(instance, directory, executable)
             remoteCopyTarantoolModule(directory, instance)
@@ -108,12 +108,12 @@ private fun EnvironmentPlugin.restartOnRemote(configuration: TarantoolConfigurat
     }
 }
 
-private fun EnvironmentPlugin.stopOnRemote(configuration: TarantoolConfiguration, name: String) = extension.remoteConfiguration.ssh {
+private fun EnvironmentPlugin.stopOnRemote(configuration: TarantoolConfiguration, name: String) = this.configuration.remoteConfiguration.ssh {
     stopLinuxRemoteProcess(name, configuration.computeRemoteDirectory(name))
 }
 
 
-private fun EnvironmentPlugin.cleanOnRemote(configuration: TarantoolConfiguration, name: String) = extension.remoteConfiguration.ssh {
+private fun EnvironmentPlugin.cleanOnRemote(configuration: TarantoolConfiguration, name: String) = this.configuration.remoteConfiguration.ssh {
     remote { delete(configuration.computeRemoteDirectory(name)) }
 }
 
@@ -155,7 +155,7 @@ private fun TarantoolConfiguration.computeLocalDirectory(name: String): Path {
 private fun TarantoolConfiguration.computeRemoteDirectory(name: String): String {
     val directory = executionConfiguration
             .remoteDirectory()
-            ?: plugin.extension.remoteConfiguration.ssh { remote { runtimeDirectory() } }
+            ?: plugin.configuration.remoteConfiguration.ssh { remote { runtimeDirectory() } }
     return directory.resolve(TARANTOOL).resolve(name)
 }
 

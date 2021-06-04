@@ -25,7 +25,7 @@ import plugin.EnvironmentPlugin
 import service.projectsDirectory
 import service.writeText
 
-fun EnvironmentPlugin.configurePublishing() = extension.publishingConfiguration.run {
+fun EnvironmentPlugin.configurePublishing() = configuration.publishingConfiguration.run {
     if (!enabled) {
         projectsDirectory.resolve(PUBLISHING_PROPERTIES).toFile().delete()
         return@run

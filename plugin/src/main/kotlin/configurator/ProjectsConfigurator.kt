@@ -34,7 +34,7 @@ import org.eclipse.jgit.transport.TagOpt.FETCH_TAGS
 import plugin.EnvironmentPlugin
 import service.*
 
-fun EnvironmentPlugin.configureProjects() = extension.apply {
+fun EnvironmentPlugin.configureProjects() = configuration.apply {
     val settings = buildString {
         appendLine(PROJECTS_NAME_TEMPLATE)
         appendLine(INCLUDE_BUILD_TEMPLATE(projectName(GRADLE_PLUGIN)))
@@ -79,7 +79,7 @@ private fun EnvironmentPlugin.configureSandbox() {
 private fun EnvironmentPlugin.configureProject(configuration: ProjectConfiguration) = configuration.run {
     val projectName = projectName(configuration.name)
     val directory = projectsDirectory.resolve(projectName)
-    val url = url ?: "${extension.defaultUrl}/$projectName"
+    val url = url ?: "${this@configureProject.configuration.defaultUrl}/$projectName"
     val version = version ?: MAIN
     val logger = project.logger(projectName)
     val clone = {
