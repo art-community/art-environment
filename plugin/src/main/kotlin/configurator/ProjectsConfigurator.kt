@@ -46,6 +46,7 @@ fun EnvironmentPlugin.configureProjects() = configuration.apply {
                 KOTLIN -> configureProject(kotlinConfiguration)
                 TARANTOOL -> configureProject(tarantoolConfiguration)
                 GENERATOR -> configureProject(generatorConfiguration)
+                UI -> configureProject(uiConfiguration)
                 EXAMPLE -> configureProject(exampleConfiguration)
             }
         }

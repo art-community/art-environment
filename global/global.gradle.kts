@@ -26,4 +26,5 @@ art {
     generator()
     example()
     tarantool()
+    ui()
 }

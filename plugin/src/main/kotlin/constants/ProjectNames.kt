@@ -8,6 +8,7 @@ const val EXAMPLE = "example"
 const val GRADLE = "gradle"
 const val GRADLE_PLUGIN = "gradle-plugin"
 const val SANDBOX = "sandbox"
+const val UI = "ui"
 
 val PROJECT_NAMES = mapOf(
         JAVA to "art-java",
@@ -16,5 +17,6 @@ val PROJECT_NAMES = mapOf(
         GENERATOR to "art-generator",
         GRADLE_PLUGIN to "art-gradle",
         EXAMPLE to "art-example",
-        SANDBOX to "sandbox"
+        SANDBOX to "sandbox",
+        UI to "art-ui",
 )

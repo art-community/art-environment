@@ -36,6 +36,8 @@ open class EnvironmentConfiguration @Inject constructor(objectFactory: ObjectFac
 
     val generatorConfiguration: ProjectConfiguration = objectFactory.newInstance(GENERATOR)
 
+    val uiConfiguration: ProjectConfiguration = objectFactory.newInstance(UI)
+
     val exampleConfiguration: ProjectConfiguration = objectFactory.newInstance(EXAMPLE)
 
     val gradlePluginConfiguration: ProjectConfiguration = objectFactory.newInstance(GRADLE_PLUGIN)
@@ -73,6 +75,11 @@ open class EnvironmentConfiguration @Inject constructor(objectFactory: ObjectFac
     fun example(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {
         projects += EXAMPLE
         configurator.execute(exampleConfiguration)
+    }
+
+    fun ui(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {
+        projects += UI
+        configurator.execute(uiConfiguration)
     }
 
     fun tarantool(configurator: Action<in TarantoolConfiguration> = EMPTY_ACTION) {
