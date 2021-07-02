@@ -22,7 +22,7 @@ import configuration.RemoteConfiguration
 import constants.*
 import constants.AuthenticationMode.KEY
 import constants.AuthenticationMode.PASSWORD
-import logger.attention
+import logger.log
 import net.schmizz.sshj.SSHClient
 import net.schmizz.sshj.connection.channel.direct.Session
 import net.schmizz.sshj.sftp.FileAttributes
@@ -69,12 +69,12 @@ class RemoteExecutionService(private var trace: Boolean, private var context: St
         if (!trace) return@session result
         plugin.printToConsole(output, error, context)
         plugin.project.run {
-            attention("Remote command executed - $command", context)
-            result.exitSignal?.let { signal -> attention("Exit signal - $signal", context) }
-            attention("Exit status - ${result.exitStatus}", context)
+            log("Remote command executed - $command", context)
+            result.exitSignal?.let { signal -> log("Exit signal - $signal", context) }
+            log("Exit status - ${result.exitStatus}", context)
             result.exitErrorMessage
                     ?.takeIf { message -> message.isNotBlank() }
-                    ?.let { message -> attention("Exit message - $message", context) }
+                    ?.let { message -> log("Exit message - $message", context) }
         }
         return@session result
     }
@@ -90,10 +90,10 @@ class RemoteExecutionService(private var trace: Boolean, private var context: St
         val command = """$CD $directory && $NOHUP $BASH $scriptPath $STDOUT_PIPE>$stdoutPath $STDERR_PIPE>$stdoutPath &""".trimIndent()
         execute(command)
         plugin.project.run {
-            attention("Remote process started", context)
-            attention("Script - $scriptPath", context)
-            attention("Output - $stdoutPath", context)
-            attention("Error - $stderrPath", context)
+            log("Remote process started", context)
+            log("Script - $scriptPath", context)
+            log("Output - $stdoutPath", context)
+            log("Error - $stderrPath", context)
         }
     }
 
