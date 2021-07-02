@@ -29,7 +29,7 @@ fun EnvironmentPlugin.printToConsole(output: OutputStream, error: OutputStream, 
     output.toString()
             .lineSequence()
             .filter { line -> line.isNotBlank() }
-            .forEach { line -> logger.attention(line) }
+            .forEach { line -> logger.log(line) }
     error.toString()
             .lineSequence()
             .filter { line -> line.isNotBlank() }
