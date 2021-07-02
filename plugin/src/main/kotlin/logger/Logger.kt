@@ -18,6 +18,7 @@
 
 package logger
 
+import constants.EMPTY_STRING
 import constants.LOG_TEMPLATE
 import org.gradle.api.Project
 
@@ -42,4 +43,8 @@ fun Project.info(message: String, context: String = project.name) {
 
 fun Project.debug(message: String, context: String = project.name) {
     logger.debug(LOG_TEMPLATE(context, message))
+}
+
+fun Project.line() {
+    log(EMPTY_STRING)
 }

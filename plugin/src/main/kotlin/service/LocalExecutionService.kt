@@ -19,8 +19,8 @@
 package service
 
 import constants.*
-import logger.attention
 import logger.line
+import logger.log
 import org.zeroturnaround.exec.ProcessExecutor
 import org.zeroturnaround.exec.ProcessResult
 import org.zeroturnaround.exec.StartedProcess
@@ -70,9 +70,9 @@ class LocalExecutionService(private var trace: Boolean, private var context: Str
         if (!trace) return processResult
         plugin.printToConsole(output, error, context)
         plugin.project.run {
-            attention("""Command executed - "${arguments.joinToString(SPACE)}" """, context)
-            attention("Directory - $directory", context)
-            attention("Exit value - ${processResult.exitValue}", context)
+            log("""Command executed - "${arguments.joinToString(SPACE)}" """, context)
+            log("Directory - $directory", context)
+            log("Exit value - ${processResult.exitValue}", context)
         }
         return processResult
     }
@@ -108,10 +108,10 @@ class LocalExecutionService(private var trace: Boolean, private var context: Str
                         .command(scriptPath.toAbsolutePath().toString())
                         .start()
                 plugin.project.run {
-                    attention("Local process started", context)
-                    attention("Script - $scriptPath", context)
-                    attention("Output - ${processDirectory.stdout()}", context)
-                    attention("Error - ${processDirectory.stderr()}", context)
+                    log("Local process started", context)
+                    log("Script - $scriptPath", context)
+                    log("Output - ${processDirectory.stdout()}", context)
+                    log("Error - ${processDirectory.stderr()}", context)
                     line()
                     return process
                 }
@@ -124,10 +124,10 @@ class LocalExecutionService(private var trace: Boolean, private var context: Str
                         .command(WSL, BASH, scriptPath.toWsl())
                         .start()
                 plugin.project.run {
-                    attention("WSL process started", name)
-                    attention("Script - $scriptPath", name)
-                    attention("Output - ${processDirectory.stdout()}", name)
-                    attention("Error - ${processDirectory.stderr()}", name)
+                    log("WSL process started", name)
+                    log("Script - $scriptPath", name)
+                    log("Output - ${processDirectory.stdout()}", name)
+                    log("Error - ${processDirectory.stderr()}", name)
                     line()
                     return process
                 }

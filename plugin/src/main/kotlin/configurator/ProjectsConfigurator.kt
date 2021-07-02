@@ -84,7 +84,7 @@ private fun EnvironmentPlugin.configureProject(configuration: ProjectConfigurati
     val version = version ?: MAIN
     val logger = project.logger(projectName)
     val clone = {
-        logger.attention("Clone $url")
+        logger.log("Clone $url")
         cloneRepository()
                 .setDirectory(directory.toFile())
                 .setBranch(version)
@@ -106,7 +106,7 @@ private fun EnvironmentPlugin.configureProject(configuration: ProjectConfigurati
                 return@run
             }
             try {
-                logger.attention("Fetch")
+                logger.log("Fetch")
                 fetch()
                         .setTagOpt(FETCH_TAGS)
                         .setRefSpecs(ADD_REFS_HEADS, ADD_REFS_TAGS)
@@ -115,14 +115,14 @@ private fun EnvironmentPlugin.configureProject(configuration: ProjectConfigurati
                         .setRecurseSubmodules(YES)
                         .call()
 
-                logger.attention("Checkout '$version'")
+                logger.log("Checkout '$version'")
                 checkout()
                         .setName(version)
                         .setUpstreamMode(TRACK)
                         .setStartPoint("$ORIGIN/$version")
                         .call()
 
-                logger.attention("Pull")
+                logger.log("Pull")
                 pull()
                         .setFastForward(FF)
                         .setTagOpt(FETCH_TAGS)
