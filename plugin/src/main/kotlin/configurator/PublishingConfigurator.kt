@@ -20,7 +20,7 @@ package configurator
 
 import constants.PUBLISHING_PROPERTIES
 import constants.PUBLISHING_PROPERTIES_TEMPLATE
-import logger.attention
+import logger.log
 import plugin.EnvironmentPlugin
 import service.projectsDirectory
 import service.writeText
@@ -32,6 +32,6 @@ fun EnvironmentPlugin.configurePublishing() = configuration.publishingConfigurat
     }
     projectsDirectory.resolve(PUBLISHING_PROPERTIES).apply {
         writeText(PUBLISHING_PROPERTIES_TEMPLATE(username, password))
-        project.attention("Publishing activated. Properties: ${toAbsolutePath()}")
+        project.log("Publishing activated. Properties: ${toAbsolutePath()}")
     }
 }

@@ -20,7 +20,7 @@ package configurator
 
 import configuration.ProjectConfiguration
 import constants.*
-import logger.attention
+import logger.log
 import logger.logger
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode.TRACK
 import org.eclipse.jgit.api.Git.cloneRepository
@@ -64,7 +64,7 @@ fun EnvironmentPlugin.configureProjects() = configuration.apply {
 private fun EnvironmentPlugin.configureSandbox() {
     val directory = projectsDirectory.resolve(SANDBOX)
     if (directory.toFile().exists()) {
-        project.attention("Sandbox configured: $directory")
+        project.log("Sandbox configured: $directory")
         return
     }
     directory.touchDirectory()
@@ -74,7 +74,7 @@ private fun EnvironmentPlugin.configureSandbox() {
     environmentDirectory.parent.resolve(GRADLE).copyRecursive(directory.resolve(GRADLE))
     environmentDirectory.parent.resolve(GRADLEW).copyRecursive(directory.resolve(GRADLEW))
     environmentDirectory.parent.resolve(GRADLEW_BAT).copyRecursive(directory.resolve(GRADLEW_BAT))
-    project.attention("Sandbox configured: $directory")
+    project.log("Sandbox configured: $directory")
 }
 
 private fun EnvironmentPlugin.configureProject(configuration: ProjectConfiguration) = configuration.run {
