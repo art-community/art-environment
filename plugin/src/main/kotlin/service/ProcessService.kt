@@ -20,7 +20,7 @@ package service
 
 import constants.KILL
 import constants.TERMINATE_SIGNAL
-import logger.attention
+import logger.log
 import plugin.EnvironmentPlugin
 import plugin.plugin
 import java.nio.file.Path
@@ -35,7 +35,7 @@ fun EnvironmentPlugin.stopWslProcess(name: String, directory: Path) {
                         ?.toInt()
                         ?.let { pid ->
                             wsl { execute(KILL, TERMINATE_SIGNAL, pid.toString()) }
-                            project.attention("WSL process killed $pid", name)
+                            project.log("WSL process killed $pid", name)
                         }
                 delete()
             }
@@ -51,7 +51,7 @@ fun EnvironmentPlugin.stopLinuxLocalProcess(name: String, directory: Path) {
                         ?.toInt()
                         ?.let { pid ->
                             native { execute(KILL, TERMINATE_SIGNAL, pid.toString()) }
-                            project.attention("Linux process killed $pid", name)
+                            project.log("Linux process killed $pid", name)
                         }
                 delete()
             }
@@ -68,7 +68,7 @@ fun RemoteClient.stopLinuxRemoteProcess(name: String, directory: String) {
                             ?.toInt()
                             ?.let { pid ->
                                 kill(pid)
-                                plugin.project.attention("Remote process killed $pid", context())
+                                plugin.project.log("Remote process killed $pid", context())
                             }
                     delete(this)
 
