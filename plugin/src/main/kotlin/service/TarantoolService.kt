@@ -22,7 +22,7 @@ import configuration.TarantoolConfiguration
 import configuration.TarantoolConfiguration.InstanceConfiguration
 import constants.*
 import constants.ExecutionMode.*
-import logger.attention
+import logger.log
 import plugin.EnvironmentPlugin
 import plugin.plugin
 import java.nio.file.Files.copy
@@ -161,15 +161,15 @@ private fun TarantoolConfiguration.computeRemoteDirectory(name: String): String 
 
 
 private fun EnvironmentPlugin.printLocalRestartingLog(instance: InstanceConfiguration, directory: String, executable: String) = project.run {
-    attention("Tarantool restarting", instance.name)
-    attention("Directory - $directory", instance.name)
-    attention("Executable - $executable", instance.name)
-    attention("Script - \n${instance.toLua().trimIndent()}", instance.name)
+    log("Tarantool restarting", instance.name)
+    log("Directory - $directory", instance.name)
+    log("Executable - $executable", instance.name)
+    log("Script - \n${instance.toLua().trimIndent()}", instance.name)
 }
 
 private fun RemoteExecutionService.printRemoteRestartingLog(instance: InstanceConfiguration, directory: String, executable: String) = plugin.project.run {
-    attention("Tarantool restarting", context(instance.name))
-    attention("Directory - $directory", context(instance.name))
-    attention("Executable - $executable", context(instance.name))
-    attention("Script - \n${instance.toLua().trimIndent()}", context(instance.name))
+    log("Tarantool restarting", context(instance.name))
+    log("Directory - $directory", context(instance.name))
+    log("Executable - $executable", context(instance.name))
+    log("Script - \n${instance.toLua().trimIndent()}", context(instance.name))
 }
