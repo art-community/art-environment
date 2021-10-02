@@ -55,7 +55,6 @@ fun EnvironmentPlugin.configureProjects() = configuration.apply {
     val buildTemplate = buildString { append(PROJECTS_GRADLE_BUILD_TEMPLATE) }
     projectsDirectory.resolve(SETTINGS_GRADLE).writeText(settings)
     projectsDirectory.resolve(BUILD_GRADLE).writeText(buildTemplate)
-    environmentDirectory.parent.resolve(GRADLE).copyRecursive(projectDirectory(GRADLE_PLUGIN).resolve(GRADLE))
     environmentDirectory.parent.resolve(GRADLE).copyRecursive(projectsDirectory.resolve(GRADLE))
     environmentDirectory.parent.resolve(GRADLEW).copyRecursive(projectsDirectory.resolve(GRADLEW))
     environmentDirectory.parent.resolve(GRADLEW_BAT).copyRecursive(projectsDirectory.resolve(GRADLEW_BAT))
