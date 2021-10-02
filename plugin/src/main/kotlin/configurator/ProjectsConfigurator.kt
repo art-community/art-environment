@@ -99,13 +99,13 @@ private fun EnvironmentPlugin.configureProject(configuration: ProjectConfigurati
         clone()
         return@run
     }
-    open(directory.toFile()).use { repository ->
-        repository.apply {
-            if (status().call().uncommittedChanges.isNotEmpty()) {
-                logger.error("Changes detected. Please stash, revert or commit them")
-                return@run
-            }
-            try {
+    try {
+        open(directory.toFile()).use { repository ->
+            repository.apply {
+                if (status().call().uncommittedChanges.isNotEmpty()) {
+                    logger.error("Changes detected. Please stash, revert or commit them")
+                    return@run
+                }
                 logger.log("Fetch")
                 fetch()
                         .setTagOpt(FETCH_TAGS)
@@ -132,9 +132,9 @@ private fun EnvironmentPlugin.configureProject(configuration: ProjectConfigurati
                         .setRemote(ORIGIN)
                         .setStrategy(THEIRS)
                         .call()
-            } catch (exception: RepositoryNotFoundException) {
-                clone()
             }
         }
+    } catch (exception: RepositoryNotFoundException) {
+        clone()
     }
 }
