@@ -84,6 +84,7 @@ private fun EnvironmentPlugin.configureProject(configuration: ProjectConfigurati
     val version = version ?: MAIN
     val logger = project.logger(projectName)
     val clone = {
+        directory.deleteRecursive()
         logger.log("Clone $url")
         cloneRepository()
                 .setDirectory(directory.toFile())
