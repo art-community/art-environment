@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+./gradlew && ./gradlew "prepareLocalEnvironment" && ./gradlew "configure"
