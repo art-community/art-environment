@@ -1,1 +1,0 @@
-./gradlew && ./gradlew "prepareLocalEnvironment" && ./gradlew "configure"
