@@ -5,7 +5,7 @@ const val PROJECTS_NAME_TEMPLATE = """rootProject.name = "projects""""
 val PROJECTS_GRADLE_BUILD_TEMPLATE =
         """
                     tasks.withType(type = Wrapper::class) {
-                        gradleVersion = "7.0"
+                        gradleVersion = "7.2"
                     }
         """.trimIndent()
 
@@ -34,6 +34,6 @@ val SANDBOX_BUILD_TEMPLATE = """
     }
     
     tasks.withType(type = Wrapper::class) {
-        gradleVersion = "7.0"
+        gradleVersion = "7.2"
     }        
     """.trimIndent()
