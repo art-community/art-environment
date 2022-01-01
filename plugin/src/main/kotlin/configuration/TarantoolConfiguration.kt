@@ -92,6 +92,8 @@ open class TarantoolConfiguration @Inject constructor(objectFactory: ObjectFacto
 box.cfg {
     listen = $port,
     pid_file = "${name}.pid",
+    log_level = 7,
+    log = "file:${name}.log",
     ${configurationParameters.entries.joinToString { entry -> "${entry.key} = ${entry.value}," }}
 }
 box.schema.user.create('$DEFAULT_USERNAME', {password = '$DEFAULT_PASSWORD', if_not_exists = true})
