@@ -82,6 +82,11 @@ open class EnvironmentConfiguration @Inject constructor(objectFactory: ObjectFac
         configurator.execute(uiConfiguration)
     }
 
+    fun fibers(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {
+        projects += FIBERS
+        configurator.execute(uiConfiguration)
+    }
+
     fun tarantool(configurator: Action<in TarantoolConfiguration> = EMPTY_ACTION) {
         projects += TARANTOOL
         configurator.execute(tarantoolConfiguration)
