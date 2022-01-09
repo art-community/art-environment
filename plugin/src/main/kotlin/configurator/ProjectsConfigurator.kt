@@ -48,6 +48,7 @@ fun EnvironmentPlugin.configureProjects() = configuration.apply {
                 GENERATOR -> configureProject(generatorConfiguration)
                 UI -> configureProject(uiConfiguration)
                 EXAMPLE -> configureProject(exampleConfiguration)
+                FIBERS -> configureProject(fibersConfiguration)
             }
         }
         if (projects.contains(SANDBOX)) configureSandbox()

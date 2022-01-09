@@ -40,6 +40,8 @@ open class EnvironmentConfiguration @Inject constructor(objectFactory: ObjectFac
 
     val exampleConfiguration: ProjectConfiguration = objectFactory.newInstance(EXAMPLE)
 
+    val fibersConfiguration: ProjectConfiguration = objectFactory.newInstance(FIBERS)
+
     val gradlePluginConfiguration: ProjectConfiguration = objectFactory.newInstance(GRADLE_PLUGIN)
 
     val tarantoolConfiguration: TarantoolConfiguration = objectFactory.newInstance()
@@ -84,7 +86,7 @@ open class EnvironmentConfiguration @Inject constructor(objectFactory: ObjectFac
 
     fun fibers(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {
         projects += FIBERS
-        configurator.execute(uiConfiguration)
+        configurator.execute(fibersConfiguration)
     }
 
     fun tarantool(configurator: Action<in TarantoolConfiguration> = EMPTY_ACTION) {
