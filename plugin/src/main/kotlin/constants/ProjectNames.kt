@@ -10,6 +10,7 @@ const val GRADLE_PLUGIN = "gradle-plugin"
 const val SANDBOX = "sandbox"
 const val UI = "ui"
 const val FIBERS = "fibers"
+const val LINUX_LOCAL = "linux-local"
 
 val PROJECT_NAMES = mapOf(
         JAVA to "art-java",
@@ -21,4 +22,5 @@ val PROJECT_NAMES = mapOf(
         SANDBOX to "sandbox",
         UI to "art-ui",
         FIBERS to "art-fibers",
+        LINUX_LOCAL to "art-linux-local",
 )

@@ -42,6 +42,8 @@ open class EnvironmentConfiguration @Inject constructor(objectFactory: ObjectFac
 
     val fibersConfiguration: ProjectConfiguration = objectFactory.newInstance(FIBERS)
 
+    val linuxLocalConfiguration: ProjectConfiguration = objectFactory.newInstance(LINUX_LOCAL)
+
     val gradlePluginConfiguration: ProjectConfiguration = objectFactory.newInstance(GRADLE_PLUGIN)
 
     val tarantoolConfiguration: TarantoolConfiguration = objectFactory.newInstance()
@@ -87,6 +89,11 @@ open class EnvironmentConfiguration @Inject constructor(objectFactory: ObjectFac
     fun fibers(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {
         projects += FIBERS
         configurator.execute(fibersConfiguration)
+    }
+
+    fun linuxLocal(configurator: Action<in ProjectConfiguration> = EMPTY_ACTION) {
+        projects += LINUX_LOCAL
+        configurator.execute(linuxLocalConfiguration)
     }
 
     fun tarantool(configurator: Action<in TarantoolConfiguration> = EMPTY_ACTION) {

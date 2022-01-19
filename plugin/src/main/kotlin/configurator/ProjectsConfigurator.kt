@@ -49,6 +49,7 @@ fun EnvironmentPlugin.configureProjects() = configuration.apply {
                 UI -> configureProject(uiConfiguration)
                 EXAMPLE -> configureProject(exampleConfiguration)
                 FIBERS -> configureProject(fibersConfiguration)
+                LINUX_LOCAL -> configureProject(linuxLocalConfiguration)
             }
         }
         if (projects.contains(SANDBOX)) configureSandbox()
