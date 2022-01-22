@@ -96,9 +96,9 @@ box.cfg {
     log = "file:${name}.log",
     ${configurationParameters.entries.joinToString { entry -> "${entry.key} = ${entry.value}," }}
 }
-box.schema.user.drop('$DEFAULT_USERNAME',{if_exists=false})
-box.schema.user.create('$DEFAULT_USERNAME', {password = '$DEFAULT_PASSWORD', if_not_exists = true})
-box.schema.user.grant('$DEFAULT_USERNAME', 'read,write,execute,create,alter,drop', 'universe', nil, {if_not_exists=true})
+box.schema.user.drop('$DEFAULT_USERNAME',{if_exists=true})
+box.schema.user.create('$DEFAULT_USERNAME', {password = '$DEFAULT_PASSWORD'})
+box.schema.user.grant('$DEFAULT_USERNAME', 'read,write,execute,create,alter,drop', 'universe', nil)
 ${executionScript.trimIndent()}
 
 """.trimIndent()
