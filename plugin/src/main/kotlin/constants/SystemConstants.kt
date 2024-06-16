@@ -4,7 +4,7 @@ import java.lang.System.getProperty
 
 
 const val OS_NAME_PROPERTY = "os.name"
-val OS = getProperty(OS_NAME_PROPERTY).toLowerCase()
+val OS = getProperty(OS_NAME_PROPERTY).lowercase()
 const val WIN = "win"
 const val MAC = "mac"
 const val NIX = "nix"

@@ -156,7 +156,7 @@ fun Path.toWsl(): String {
                 .replace(WINDOWS_DISK_PATH_BACKWARD_SLASH_REGEX.toRegex(), SLASH)
                 .replace(BACKWARD_SLASH_REGEX.toRegex(), SLASH)
         val firstLetter: String = EMPTY_STRING + path[0]
-        return WSL_DISK_PREFIX + firstLetter.toLowerCase() + path.substring(1)
+        return WSL_DISK_PREFIX + firstLetter.lowercase(Locale.getDefault()) + path.substring(1)
     }
     return toString()
 }
