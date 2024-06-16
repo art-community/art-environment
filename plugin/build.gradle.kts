@@ -38,7 +38,7 @@ gradlePlugin {
 }
 
 dependencies {
-    implementation("org.eclipse.jgit:org.eclipse.jgit:+")
-    implementation("org.zeroturnaround:zt-exec:+")
-    implementation("com.hierynomus", "sshj", "+")
+    implementation("org.eclipse.jgit:org.eclipse.jgit:6.10.0.202406032230-r")
+    implementation("org.zeroturnaround:zt-exec:1.12")
+    implementation("com.hierynomus:sshj:0.38.0")
 }
