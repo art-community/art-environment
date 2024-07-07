@@ -25,6 +25,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
 import org.gradle.process.internal.shutdown.ShutdownHooks.addShutdownHook
+import service.configureReleasing
 import java.util.concurrent.ExecutorService
 
 lateinit var plugin: EnvironmentPlugin
@@ -46,6 +47,7 @@ class EnvironmentPlugin : Plugin<Project> {
         target.runCatching {
             addShutdownHook { executors.forEach(ExecutorService::shutdownNow) }
             configureTasks()
+            afterEvaluate { configureReleasing() }
         }.onFailure { error -> target.logger.error(error.message, error) }
     }
 }

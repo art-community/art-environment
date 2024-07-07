@@ -52,6 +52,8 @@ open class EnvironmentConfiguration @Inject constructor(objectFactory: ObjectFac
 
     val remoteConfiguration: RemoteConfiguration = objectFactory.newInstance()
 
+    val releaseConfiguration: ReleaseConfiguration = objectFactory.newInstance()
+
     fun url(url: String) {
         defaultUrl = url
     }
@@ -107,6 +109,10 @@ open class EnvironmentConfiguration @Inject constructor(objectFactory: ObjectFac
 
     fun remote(configurator: Action<in RemoteConfiguration> = EMPTY_ACTION) {
         configurator.execute(remoteConfiguration)
+    }
+
+    fun release(configurator: Action<in ReleaseConfiguration> = EMPTY_ACTION) {
+        configurator.execute(releaseConfiguration)
     }
 
     fun sandbox() {
