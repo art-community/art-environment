@@ -15,6 +15,7 @@ fun Project.configureReleasing() {
                 group = ART
                 doLast {
                     configuration.projects.forEach { project ->
+                        if (configuration.releaseConfiguration.only != null && project != configuration.releaseConfiguration.only) return@forEach
                         logger.quiet("Releasing ${projectName(project)} with tag ${configuration.releaseConfiguration.version}")
                         val projectName = projectName(project)
                         val directory = projectsDirectory.resolve(projectName)
